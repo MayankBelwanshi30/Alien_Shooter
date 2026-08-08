@@ -134,8 +134,8 @@ No install, no build step.
 
 ### 1. Get the files
 ```
-git clone https://github.com/yourusername/alien-shooter-hospital.git
-cd alien-shooter-hospital
+git clone https://github.com/MayankBelwanshi30/Alien_Shooter.git
+
 ```
 
 ### 2. Add the assets
