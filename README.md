@@ -1,6 +1,6 @@
 # Alien Shooter 
 ## Project Preview
-![Gameplay Screenshot](screenshots/gameplay.png)
+![Gameplay Screenshot](screenshots/final.png)
 
 ## Description
 **Alien Shooter** is a top-down survival shooter built entirely as a **single self-contained HTML file** — no build step, no bundler, no dependencies. Just Canvas 2D, the Web Audio API, and vanilla JavaScript.
@@ -26,13 +26,13 @@ Built to explore how far a browser game can go with **zero frameworks**: procedu
 ## Screenshots
 
 **Title Screen**
-![Title Screen](screenshots/title_screen.png)
+![Title Screen](screenshots/title.png)
 
 **Level Selection**
-![Level Selection](screenshots/level_select.png)
+![Level Selection](screenshots/level.png)
 
 **In-Game**
-![Gameplay](screenshots/gameplay.png)
+![Gameplay](screenshots/final.png)
 
 ---
 ## Weapons
