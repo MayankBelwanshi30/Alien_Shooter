@@ -1,402 +1,169 @@
 # Alien Shooter 
-
----
+## Project Preview
+![Gameplay Screenshot](./screenshots/gameplay.png)
 
 ## Description
+**Alien Shooter** is a top-down survival shooter built entirely as a **single self-contained HTML file** — no build step, no bundler, no dependencies. Just Canvas 2D, the Web Audio API, and vanilla JavaScript.
 
-**Alien Shooter** is a browser-based top-down survival shooter set inside **Hospital**, a facility overrun by hostile alien creatures.
+You wake up outside **St. Mercy Hospital**. Somewhere inside is a vaccine — nobody knows which room. Search the wards, fight through runners, crawlers, and tanks, find the vaccine, radio it in from the Radio Room, then fight your way across the building to the Exit Corridor before the chopper leaves without you.
 
-The player must explore the hospital, locate a randomly hidden vaccine, reach the Radio Room to request extraction, and survive the final wave before reaching the Exit Corridor.
-
-The game combines **top-down shooting, exploration, resource management, enemy encounters, interactive environments, and an objective-driven extraction system**.
-
-Built from scratch using **HTML5 Canvas, JavaScript, CSS, and Web Audio**, without a traditional game engine.
+Built to explore how far a browser game can go with **zero frameworks**: procedural floor rendering, room-by-room alien spawning, a breakable-wall shortcut system, and a fully synthesized + sample-based audio layer.
 
 ---
-
-## Gameplay
-
-The current playable mission follows a simple objective-driven progression:
-
-```text
-Explore Hospital
-       ↓
-Find Vaccine
-       ↓
-Reach Radio Room
-       ↓
-Call Extraction
-       ↓
-Survive Alien Wave
-       ↓
-Reach Exit Corridor
-       ↓
-Mission Complete
-```
-
-The vaccine is placed randomly within eligible hospital rooms, requiring the player to explore the map rather than following a fixed route.
-
----
-
 ## Features
-
-* **Top-down combat** with mouse aiming and keyboard movement
-* **Multiple weapons** — Pistol, Assault Rifle, Shotgun, and Katana
-* **Randomized objective** — vaccine location changes between runs
-* **Hospital exploration** across interconnected rooms and corridors
-* **Multiple enemy types** with different combat characteristics
-* **Interactive doors** that trigger room encounters
-* **Medkit system** for health recovery
-* **Breakable environmental objects**
-* **Dynamic enemy spawning** during extraction
-* **Radio-based extraction objective**
-* **Score and kill tracking**
-* **Pause and restart functionality**
-* **Custom background music and sound effects**
-* **Mission complete / failure states**
-
-The implemented weapon controls are `1/2/3` for firearms and `Q` for the Katana, with `H` used for medkits.
+* Full loop-corridor hospital map with a sealed core and a **breakable-wall shortcut**
+* Room-by-room alien reveal — doors trigger spawns only when you get close
+* 3 weapons + a limited-use melee **Katana** finisher
+* Vaccine → Radio Room → Exit Corridor three-stage mission structure
+* Escalating post-radio-call survival phase with scaling alien spawns
+* Pause menu (**ESC**) with a return-to-main-menu option
+* Health, armor, and medkit pickup system
+* Real sample-based SFX (gunfire, footsteps, reload, alien, radio, chopper) layered with lightweight synthesized hit/pickup sounds
+* Menu music while browsing, a separate ambient loop while playing
+* Level Select screen with 3 mission slots (1 playable, 2 coming soon)
 
 ---
-
-## Weapons
-
-| Weapon            | Role                           | Control |
-| ----------------- | ------------------------------ | ------- |
-| **Pistol**        | Reliable, accurate sidearm     | `1`     |
-| **Assault Rifle** | High-rate automatic weapon     | `2`     |
-| **Shotgun**       | High-damage close-range weapon | `3`     |
-| **Katana**        | Limited-charge melee attack    | `Q`     |
-
-The Katana performs an area attack around the player and consumes one charge per use.
-
----
-
-## Enemy Types
-
-The current build contains three enemy variants:
-
-* **Runner** — fast, aggressive enemy
-* **Crawler** — slower, more durable enemy
-* **Tank** — high-health heavy enemy
-
-Different rooms contain different enemy combinations, making exploration progressively more dangerous.
-
----
-
-## Hospital Map
-
-The first level is designed around a large **loop corridor surrounding a central sealed area**, with rooms branching from all four sides.
-
-### Current Areas
-
-* Reception
-* Waiting Hall
-* Laboratory
-* Pharmacy
-* Storage
-* Generator Room
-* Security Room
-* Radio Room
-* ICU
-* Emergency Ward
-* Exit Corridor
-
----
-
-## Extraction System
-
-The extraction sequence is designed as a multi-stage objective rather than a single end-point.
-
-### 1. Locate the Vaccine
-
-The vaccine is placed randomly in one of the eligible hospital rooms.
-
-### 2. Reach the Radio Room
-
-After collecting the vaccine, the player must reach the Radio Room and interact with the radio.
-
-### 3. Trigger Extraction
-
-Calling the helicopter starts the final phase of the mission.
-
-### 4. Reach the Exit
-
-Additional aliens spawn through the hospital corridors while the player makes their way to the Exit Corridor.
-
----
-
 ## Screenshots
 
-### Title Screen
+**Title Screen**
+![Title Screen](./screenshots/title_screen.png)
 
-![Title Screen](screenshots/title.png)
+**Level Selection**
+![Level Selection](./screenshots/level_select.png)
 
----
-
-### Level Selection
-
-![Level Selection](screenshots/level.png)
-
----
-
-### Gameplay
-
-![Gameplay](screenshots/final.png)
-
+**In-Game**
+![Gameplay](./screenshots/gameplay.png)
 
 ---
+## Weapons
 
+| Weapon | Damage | Magazine | Reserve | Fire Rate | Notes |
+|---|---|---|---|---|---|
+| **Pistol** | 32 | 12 | 192 | Semi-auto | Fast reload, reliable starter sidearm |
+| **Assault Rifle** | 16 | 30 | 420 | Full-auto | High rate of fire, moderate spread |
+| **Shotgun** | 11 × 8 pellets | 6 | 84 | Slow | Devastating up close, wide spread |
+| **Katana** ⚔ | Instant kill | 3 charges | — | Melee | Kills every alien in a short radius around you, no ammo required |
+
+Weapons are switched with **1 / 2 / 3**, the Katana is triggered with **Q**, and each has its own reload behavior — the pistol snaps back into action almost twice as fast as the rifle or shotgun.
+
+---
+## The Hospital
+
+St. Mercy Hospital is built as a **loop corridor** wrapped around a sealed interior core, with rooms hanging off all four sides:
+
+```
+                 RECEPTION   WAITING HALL   LABORATORY
+                     └───────────┬───────────┘
+         SECURITY  ┌──────────────────────────────┐  ICU
+                   │        (sealed core,         │
+        RADIO ROOM │     breakable shortcut       │  EMERGENCY
+                   │         through center)      │  WARD
+                   └──────────────────────────────┘
+                     ┌───────────┬───────────┐
+               PHARMACY   STORAGE   GENERATOR   EXIT CORRIDOR
+```
+
+* **Reception** — your starting room
+* **Laboratory / ICU / Emergency Ward / Generator Room** — the heaviest alien concentrations (crawlers & tanks)
+* **Radio Room** — call in the vaccine once you've found it
+* **Exit Corridor** — the extraction point, on the opposite side of the building from Reception
+* **Sealed core shortcut** — a barricaded wall through the middle of the hospital that aliens (and bullets) can break open over time, creating a secret shortcut across the map
+
+Once you call in the vaccine, the loop corridors become the arena for an escalating final stand as you fight your way to the Exit Corridor.
+
+---
 ## Controls
 
-| Input                  | Action        |
-| ---------------------- | ------------- |
-| `W A S D` / Arrow Keys | Move          |
-| Mouse                  | Aim           |
-| Left Click             | Fire          |
-| `R`                    | Reload        |
-| `1`                    | Pistol        |
-| `2`                    | Assault Rifle |
-| `3`                    | Shotgun       |
-| `Q`                    | Katana        |
-| `E`                    | Interact      |
-| `H`                    | Medkit        |
-| `ESC`                  | Pause         |
+| Key | Action |
+|---|---|
+| **WASD / Arrows** | Move |
+| **Mouse** | Aim |
+| **Click** | Fire |
+| **R** | Reload |
+| **1 / 2 / 3** | Pistol / Assault Rifle / Shotgun |
+| **Q** | Katana (3 charges) |
+| **E** | Interact (collect vaccine, call radio, escape) |
+| **H** | Use medkit |
+| **ESC** | Pause / Resume |
+| **M** | Return to Main Menu (while paused or on an end screen) |
 
 ---
-
-## Technical Implementation
-
-The game is implemented using a custom JavaScript game loop and the **HTML5 Canvas API**.
-
-### Core Systems
-
-```text
-Game
-│
-├── Player
-│   ├── Movement
-│   ├── Health
-│   ├── Weapons
-│   └── Inventory
-│
-├── Combat
-│   ├── Bullets
-│   ├── Weapon Switching
-│   ├── Damage
-│   └── Melee Attack
-│
-├── Enemies
-│   ├── Runner
-│   ├── Crawler
-│   └── Tank
-│
-├── Environment
-│   ├── Walls
-│   ├── Doors
-│   ├── Furniture
-│   └── Breakable Objects
-│
-├── Objectives
-│   ├── Vaccine
-│   ├── Radio
-│   └── Extraction
-│
-└── Audio / Effects
-    ├── Music
-    ├── SFX
-    ├── Particles
-    └── Screen Shake
-```
-
-The hospital is constructed programmatically from room definitions, structural walls, doors, furniture and corridor geometry.
-
----
-
 ## Project Structure
-
-```text
-Alien_Shooter/
-│
-├── alien_shooter.html
-│
-├── Assets/
-│   ├── soldier.png
-│   ├── alien11.png
-│   ├── alien10.png
-│   └── alien9.png
-│
-├── assets/
-│   ├── start.jpg
-│   ├── hospital.jpg
-│   ├── hospital2.jpg
-│   ├── hospital3.jpg
-│   ├── pistol.jpeg
-│   ├── ar.jpeg
-│   ├── shotgun.jpeg
-│   ├── pistol.mp3
-│   ├── ar.mp3
-│   ├── shotgun.mp3
-│   ├── reload.mp3
-│   ├── creep.mp3
-│   └── bgm.mp3
-│
+```
+alien-shooter-hospital/
+├── game.html                 Entire game — HTML, CSS, and JS in one file
+├── README.md
 ├── screenshots/
-│   ├── title-screen.png
-│   ├── level-selection.png
-│   ├── final-game.png
-│   └── level-complete.png
-│
-└── README.md
+│   ├── title_screen.png
+│   ├── level_select.png
+│   └── gameplay.png
+└── assets/
+    ├── start.jpg              Title screen background
+    ├── hospital1.jpg           Level 1 thumbnail
+    ├── hospital2.jpg           Level 2 thumbnail (Courtyard)
+    ├── hospital3.jpg           Level 3 thumbnail (Vilgax)
+    ├── pistol.jpg              Weapon HUD icon
+    ├── ar.jpg                  Weapon HUD icon
+    ├── shotgun.jpg             Weapon HUD icon
+    ├── Assets/soldier.png       Player sprite
+    ├── Assets/alien4.png        Runner sprite
+    ├── Assets/alien7.png        Crawler sprite
+    ├── tank.png                Tank sprite
+    ├── bgm.mp3                 Menu / loading music
+    ├── creep.mp3               In-game ambient loop
+    ├── pistol.mp3               Pistol fire
+    ├── ar.mp3                   AR fire
+    ├── shotgun.mp3              Shotgun fire
+    ├── foot.mp3                 Footsteps
+    ├── reload.mp3                Reload
+    ├── alien.mp3                 Alien growl / reveal
+    ├── radio.mp3                  Radio call
+    └── heli.mp3                   Helicopter extraction
 ```
 
 ---
-
 ## Tech Stack
-
-* **JavaScript** — Core gameplay and game logic
-* **HTML5 Canvas** — Rendering and game world
-* **CSS3** — Menus, HUD and interface
-* **Web Audio API** — Dynamic audio and sound effects
-* **HTML5** — Browser-based deployment
+* **Rendering:** HTML5 Canvas 2D (no WebGL, no rendering libraries)
+* **Audio:** Web Audio API for synthesized hit/pickup SFX + `<audio>` elements for sampled weapon, ambient, and event sounds
+* **Language:** Vanilla JavaScript (ES6 classes, no framework, no bundler)
+* **Fonts:** Google Fonts (Poppins)
 
 ---
-
 ## Getting Started
+No install, no build step.
 
-### Clone the repository
-
-```bash
-git clone https://github.com/MayankBelwanshi30/Alien_Shooter.git
-cd Alien_Shooter
+### 1. Get the files
+```
+git clone https://github.com/yourusername/alien-shooter-hospital.git
+cd alien-shooter-hospital
 ```
 
-### Run the game
+### 2. Add the assets
+Drop the image/audio files listed in **Project Structure** above into an `assets/` folder next to `game.html`.
 
-Open:
-
-```text
-alien_shooter.html
+### 3. Run it
+Just open `game.html` in a browser — or serve it locally to avoid any file:// audio restrictions:
 ```
-
-For development, a local server such as **VS Code Live Server** is recommended.
-
----
-
-## Current Status
-
-### Version 0.1 — St. Mercy Hospital
-
-| System              | Status     |
-| ------------------- | ---------- |
-| Main Menu           | ✅ Complete |
-| Level Selection     | ✅ Complete |
-| Mission Briefing    | ✅ Complete |
-| Hospital Level      | ✅ Complete |
-| Player Movement     | ✅ Complete |
-| Combat System       | ✅ Complete |
-| Weapons             | ✅ Complete |
-| Alien AI            | ✅ Complete |
-| Random Vaccine      | ✅ Complete |
-| Radio / Extraction  | ✅ Complete |
-| Audio System        | ✅ Complete |
-| Mission Completion  | ✅ Complete |
-| Courtyard — Level 2 | 🔄 Planned |
-| Vilgax — Level 3    | 🔄 Planned |
+npx serve .
+```
+Then visit the local URL it prints.
 
 ---
-
 ## Future Improvements
-
-### Gameplay
-
-* Additional campaign levels
-* New alien variants
-* Boss encounters
-* More weapons and equipment
-* Difficulty levels
-* Player progression and upgrades
-* Improved enemy pathfinding
-* Additional environmental interactions
-
-### Level Design
-
-* **Level 2 — Courtyard**
-* **Level 3 — Vilgax**
-* Additional hospital sections
-* New environments and combat arenas
-* Larger interconnected maps
-
-### Technical
-
-* Improved enemy AI
-* Persistent save system
-* Controller support
-* Mobile controls
-* Performance optimization
-* Improved animation system
-* More advanced particle and lighting effects
+* **Level 2 — Courtyard**: outdoor combat with open sightlines and different alien AI
+* **Level 3 — Vilgax**: a boss-driven finale
+* A real minimap instead of relying on memory of the loop layout
+* More weapons (SMG, sniper rifle, grenade launcher)
+* Persistent save/progress system across levels
+* Difficulty settings and a New Game+ mode
+* Controller and mobile touch-control support
+* Proper sprite-sheet animation for the player and aliens instead of static rotated sprites
+* Leaderboard / score persistence
 
 ---
-
-## Development Goals
-
-The project is being developed incrementally, with the current hospital mission serving as the foundation for a larger multi-level survival shooter.
-
-The primary focus is on:
-
-* Responsive top-down combat
-* Clear objective-driven gameplay
-* Modular enemy and weapon systems
-* Procedurally varied objectives
-* Expandable level architecture
-* Browser-native performance
-
----
-
-## License
-
-This project is currently developed as a personal game project.
-
----
-
-## Roadmap
-
-```text
-[v0.1] St. Mercy Hospital
-       │
-       ├── Combat
-       ├── Weapons
-       ├── Alien AI
-       ├── Extraction
-       └── Audio
-             │
-             ▼
-[v0.2] Courtyard
-       │
-       ├── New Environment
-       ├── New Enemies
-       └── Expanded Combat
-             │
-             ▼
-[v0.3] Underground Facility
-       │
-       ├── New Mechanics
-       └── Advanced Enemies
-             │
-             ▼
-[v1.0] Vilgax
-       │
-       └── Final Boss Encounter
-```
-
----
-
-## Author
-
-**Mayank Belwanshi**
-
-A personal game-development project exploring **JavaScript game programming, Canvas rendering, AI behavior, procedural level systems, combat mechanics, and interactive game design**.
-
----
-
+## Learning Outcomes
+* Structuring a full game loop (input → update → collision → render) in vanilla JS without a game engine
+* Doorway-triggered, room-scoped enemy spawning driven by simple proximity checks
+* Building a believable wall/collision system with axis-sliding movement and breakable barricades
+* Mixing procedurally synthesized audio (Web Audio API buffers) with sampled `<audio>` playback for a layered sound design
+* Managing screen/state flow (menu → level select → mission brief → game → pause → end screens) with plain DOM + CSS transitions alongside a canvas-rendered game
