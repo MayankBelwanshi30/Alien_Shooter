@@ -1,0 +1,2852 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ALIEN SHOOTER — HOSPITAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+      body {
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+      canvas {
+        display: block;
+        cursor: crosshair;
+      }
+      .screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.45s ease;
+        z-index: 10;
+      }
+      .screen.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .screen.top {
+        z-index: 20;
+      }
+
+      /* MAIN MENU */
+      #menuScreen {
+        background: #050505 url("assets/start.jpg") center/cover no-repeat;
+        justify-content: flex-end;
+        padding-bottom: 9vh;
+      }
+      #menuScreen::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.15) 0%,
+          rgba(0, 0, 0, 0.55) 60%,
+          rgba(0, 0, 0, 0.9) 100%
+        );
+      }
+      #menuScreen .menuBtns {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        align-items: center;
+      }
+      .menuBtn {
+        width: 280px;
+        padding: 15px 0;
+        font-size: 15px;
+        letter-spacing: 4px;
+        font-weight: 600;
+        text-transform: uppercase;
+        background: rgba(20, 20, 20, 0.55);
+        color: #eee;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 6px;
+        cursor: pointer;
+        backdrop-filter: blur(4px);
+        transition: all 0.2s;
+      }
+      .menuBtn:hover {
+        background: #a00;
+        border-color: #f33;
+        box-shadow: 0 0 22px rgba(255, 40, 40, 0.5);
+        transform: translateY(-2px);
+      }
+
+      /* LEVEL SELECT */
+      #levelSelect {
+        background: #08090b;
+      }
+      #levelSelect h2 {
+        color: #ff5533;
+        font-size: 28px;
+        letter-spacing: 6px;
+        margin-bottom: 30px;
+        font-weight: 700;
+      }
+      .levelGrid {
+        display: flex;
+        gap: 22px;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: flex-start;
+        max-width: 94vw;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 6px;
+      }
+      .levelCard {
+        width: 320px;
+        flex: 0 0 320px;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #111;
+        border: 1px solid #2a2a2a;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: all 0.2s;
+      }
+      .levelCard:hover {
+        border-color: #c00;
+        transform: translateY(-3px);
+        box-shadow: 0 14px 34px rgba(180, 0, 0, 0.35);
+      }
+      .levelCard .thumb {
+        width: 100%;
+        height: 340px;
+        background: #222 url("assets/hospital.jpg") center/cover no-repeat;
+        position: relative;
+      }
+      .levelCard .thumb::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          transparent 50%,
+          rgba(0, 0, 0, 0.85) 100%
+        );
+      }
+      .levelCard .thumb .lvltag {
+        position: absolute;
+        left: 16px;
+        bottom: 14px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 1.5px;
+        z-index: 2;
+        line-height: 1.3;
+      }
+      .levelCard .body {
+        padding: 16px 18px 20px;
+      }
+      .levelCard .body p {
+        font-size: 12.5px;
+        line-height: 1.65;
+        color: #999;
+        margin-bottom: 10px;
+      }
+      .levelCard .go {
+        color: #ff4433;
+        font-size: 12px;
+        letter-spacing: 2px;
+        font-weight: 600;
+      }
+      #backBtn {
+        margin-top: 22px;
+        background: none;
+        border: 1px solid #444;
+        color: #888;
+        padding: 10px 26px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        letter-spacing: 2px;
+      }
+      #backBtn:hover {
+        border-color: #888;
+        color: #ccc;
+      }
+      .levelCard.disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+      .levelCard.disabled:hover {
+        transform: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border-color: #2a2a2a;
+      }
+
+      /* SETTINGS */
+      #settingsScreen {
+        background: #08090b;
+        color: #ddd;
+      }
+      #settingsScreen h2 {
+        color: #ffaa33;
+        font-size: 26px;
+        letter-spacing: 5px;
+        margin-bottom: 30px;
+        font-weight: 700;
+      }
+      .settingsRow {
+        width: 420px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 13px;
+        color: #bbb;
+      }
+      .settingsRow input[type="range"] {
+        width: 220px;
+      }
+
+      /* MISSION BRIEF */
+      #missionBrief {
+        background: rgba(0, 0, 0, 0.97);
+        color: #ddd;
+        text-align: center;
+        padding: 30px;
+      }
+      #missionBrief h2 {
+        color: #ff3322;
+        font-size: 24px;
+        letter-spacing: 5px;
+        margin-bottom: 18px;
+        font-weight: 700;
+      }
+      #missionBrief .box {
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 18px 28px;
+        margin-bottom: 22px;
+        background: rgba(255, 255, 255, 0.02);
+        max-width: 560px;
+      }
+      #missionBrief .box p {
+        font-size: 12.5px;
+        color: #999;
+        margin: 6px 0;
+        line-height: 1.6;
+      }
+      #missionBrief .box span {
+        color: #fff;
+        font-weight: 600;
+      }
+      .bigBtn {
+        padding: 14px 46px;
+        font-size: 15px;
+        letter-spacing: 4px;
+        font-weight: 600;
+        background: #8b0000;
+        color: #fff;
+        border: 1px solid #f00;
+        border-radius: 6px;
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .bigBtn:hover {
+        background: #cc0000;
+        box-shadow: 0 0 20px #f00;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menuScreen" class="screen active top">
+      <div class="menuBtns">
+        <button class="menuBtn" onclick="show('levelSelect')">
+          Start Game
+        </button>
+        <button class="menuBtn" onclick="show('levelSelect')">
+          Level Select
+        </button>
+        <button class="menuBtn" onclick="show('settingsScreen')">
+          Settings
+        </button>
+        <button class="menuBtn" id="exitBtn">Exit</button>
+      </div>
+    </div>
+
+    <div id="levelSelect" class="screen">
+      <h2>SELECT MISSION</h2>
+      <div class="levelGrid">
+        <div class="levelCard" onclick="openBrief()">
+          <div class="thumb">
+            <div class="lvltag">LEVEL 1 — ST. MERCY HOSPITAL</div>
+          </div>
+          <div class="body">
+            <p>
+              The vaccine is hidden somewhere inside — nobody knows which room,
+              or what's waiting in the others. Search the wards. Find it. Reach
+              the radio room and call it in, then get across the building to the
+              exit before the hospital is lost.
+            </p>
+            <div class="go">▶ BEGIN MISSION</div>
+          </div>
+        </div>
+        <div class="levelCard disabled">
+          <div class="thumb" style="background: #1a1a1a">
+            <div class="lvltag">LEVEL 2 — COURTYARD</div>
+          </div>
+          <div class="body">
+            <p>
+              The fight moves outdoors. Overrun gardens, collapsed fences, and
+              wide open sightlines — a very different kind of survival.
+            </p>
+            <div class="go" style="color: #888">COMING SOON</div>
+          </div>
+        </div>
+      </div>
+      <button id="backBtn" onclick="show('menuScreen')">◂ Back</button>
+    </div>
+
+    <div id="settingsScreen" class="screen">
+      <h2>SETTINGS</h2>
+      <div class="settingsRow">
+        <span>Master Volume</span
+        ><input type="range" id="volSlider" min="0" max="100" value="80" />
+      </div>
+      <button
+        id="backBtn2"
+        class="menuBtn"
+        onclick="show('menuScreen')"
+        style="width: 200px"
+      >
+        ◂ Back
+      </button>
+    </div>
+
+    <div id="missionBrief" class="screen">
+      <h2>MISSION BRIEFING</h2>
+      <div class="box">
+        <p>
+          <span>WASD / Arrows</span> Move &nbsp;|&nbsp; <span>Mouse</span> Aim
+          &nbsp;|&nbsp; <span>Click</span> Fire
+        </p>
+        <p>
+          <span>R</span> Reload &nbsp;|&nbsp; <span>1/2/3</span> Pistol / AR /
+          Shotgun &nbsp;|&nbsp; <span>Q</span> Katana &nbsp;|&nbsp;
+          <span>E</span> Interact &nbsp;|&nbsp; <span>H</span> Medkit
+          &nbsp;|&nbsp; <span>ESC</span> Pause
+        </p>
+        <p>The vaccine is hidden at random. Search every room to find it.</p>
+        <p>
+          Then find the <span>Radio Room</span> and call it in — extraction
+          begins on your end at the <span>Exit Corridor</span>, on the opposite
+          side of the hospital. You'll have <span>3:00</span> before things get
+          hairy, but the helicopter will still wait for you after that.
+        </p>
+      </div>
+      <button class="bigBtn" onclick="launchLevel()">▶ DROP IN</button>
+    </div>
+
+    <canvas id="game"></canvas>
+    <script>
+      "use strict";
+      const W = 900,
+        H = 600,
+        WW = 3500,
+        WH = 2950,
+        TILE = 80;
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      canvas.width = W;
+      canvas.height = H;
+
+      // ── Screen flow ──────────────────────────────────────────────────────────────
+      function show(id) {
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active", "top"));
+        const el = document.getElementById(id);
+        el.classList.add("active", "top");
+      }
+      function openBrief() {
+        show("missionBrief");
+      }
+      function launchLevel() {
+        document
+          .getElementById("missionBrief")
+          .classList.remove("active", "top");
+        stopMenuBgm();
+        startGame();
+      }
+      document.getElementById("exitBtn").addEventListener("click", () => {
+        try {
+          window.close();
+        } catch (e) {}
+        document.body.innerHTML =
+          '<div style="color:#888;font-size:14px;letter-spacing:2px;font-family:Poppins,sans-serif">You can close this tab now.</div>';
+      });
+      let masterVol = 0.8;
+      document.getElementById("volSlider").addEventListener("input", (e) => {
+        masterVol = e.target.value / 100;
+        if (bgmAudio)
+          bgmAudio.volume = (game && game.paused ? 0.12 : 0.4) * masterVol;
+        if (menuBgmAudio) menuBgmAudio.volume = 0.4 * masterVol;
+      });
+
+      function resize() {
+        const s = Math.min(innerWidth / W, innerHeight / H);
+        canvas.style.width = W * s + "px";
+        canvas.style.height = H * s + "px";
+      }
+      addEventListener("resize", resize);
+      resize();
+
+      // ── Images ───────────────────────────────────────────────────────────────────
+      const IMG = {};
+      function loadImg(name, src) {
+        const i = new Image();
+        i.src = src;
+        IMG[name] = i;
+      }
+      loadImg("hunter", "Assets/soldier.png");
+      loadImg("runner", "Assets/alien10.png");
+      loadImg("crawler", "Assets/alien7.png");
+      loadImg("tank", "assets/tank.png");
+
+      // ── Audio ────────────────────────────────────────────────────────────────────
+      let AC = null;
+      const sfx = {};
+      let bgmAudio = null;
+      let menuBgmAudio = null;
+      function initAudio() {
+        AC = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      function mkBuf(sec, fn) {
+        if (!AC) return null;
+        const sr = AC.sampleRate,
+          n = Math.ceil(sr * sec),
+          b = AC.createBuffer(1, n, sr),
+          d = b.getChannelData(0);
+        for (let i = 0; i < n; i++) fn(d, i, i / sr, n, sr);
+        return b;
+      }
+      function playBuf(buf, vol = 1, detune = 0) {
+        if (!AC || !buf) return;
+        const s = AC.createBufferSource(),
+          g = AC.createGain();
+        s.buffer = buf;
+        s.detune.value = detune;
+        g.gain.value = vol * masterVol;
+        s.connect(g);
+        g.connect(AC.destination);
+        s.start();
+      }
+      function playFile(path, vol = 1) {
+        const a = new Audio(path);
+        a.volume = vol * masterVol;
+        a.play().catch(() => {});
+      }
+      // gameplay bgm loop uses creep.mp3
+      function startBgm() {
+        bgmAudio = new Audio("assets/creep.mp3");
+        bgmAudio.loop = true;
+        bgmAudio.volume = 0.4 * masterVol;
+        bgmAudio.play().catch(() => {});
+      }
+      // menu/loading bgm uses bgm.mp3, runs from the moment the page loads until the level actually starts
+      function startMenuBgm() {
+        menuBgmAudio = new Audio("assets/bgm.mp3");
+        menuBgmAudio.loop = true;
+        menuBgmAudio.volume = 0.4 * masterVol;
+        const p = menuBgmAudio.play();
+        if (p && p.catch)
+          p.catch(() => {
+            const resume = () => {
+              if (menuBgmAudio) menuBgmAudio.play().catch(() => {});
+              removeEventListener("pointerdown", resume);
+            };
+            addEventListener("pointerdown", resume, { once: true });
+          });
+      }
+      function stopMenuBgm() {
+        if (menuBgmAudio) {
+          menuBgmAudio.pause();
+          menuBgmAudio = null;
+        }
+      }
+      function buildSounds() {
+        sfx.pistol = mkBuf(0.24, (d, i, t) => {
+          const crack = (Math.random() * 2 - 1) * Math.exp(-t * 75) * 0.9;
+          const thump =
+            Math.sin(2 * Math.PI * 110 * t) * Math.exp(-t * 25) * 0.5;
+          d[i] = Math.max(-1, Math.min(1, crack + thump));
+        });
+        sfx.ar = mkBuf(0.16, (d, i, t) => {
+          const crack = (Math.random() * 2 - 1) * Math.exp(-t * 95) * 0.85;
+          const thump =
+            Math.sin(2 * Math.PI * 140 * t) * Math.exp(-t * 30) * 0.4;
+          d[i] = Math.max(-1, Math.min(1, crack + thump));
+        });
+        sfx.shotgun = mkBuf(0.4, (d, i, t) => {
+          const boom = (Math.random() * 2 - 1) * Math.exp(-t * 20) * 0.95;
+          const thump =
+            Math.sin(2 * Math.PI * 70 * t) * Math.exp(-t * 12) * 0.6;
+          d[i] = Math.max(-1, Math.min(1, boom + thump));
+        });
+        sfx.death = mkBuf(0.5, (d, i, t) => {
+          const fr = 1200 - 900 * (t / 0.5);
+          d[i] =
+            (Math.sin(2 * Math.PI * fr * t) * 0.55 +
+              (Math.random() * 2 - 1) * 0.2) *
+            Math.exp(-t * 8);
+        });
+        sfx.hit = mkBuf(0.12, (d, i, t) => {
+          d[i] =
+            (Math.random() * 2 - 1) * Math.exp(-t * 38) * 0.4 +
+            Math.sin(2 * Math.PI * 180 * t) * Math.exp(-t * 25) * 0.25;
+        });
+        sfx.hurt = mkBuf(0.45, (d, i, t) => {
+          d[i] =
+            (Math.sin(2 * Math.PI * (350 - (130 * t) / 0.45) * t) * 0.6 +
+              (Math.random() * 2 - 1) * 0.22) *
+            Math.exp(-t * 6.5);
+        });
+        sfx.empty = mkBuf(0.08, (d, i, t) => {
+          d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 60) * 0.35;
+        });
+        sfx.reload = mkBuf(0.18, (d, i, t, n, sr) => {
+          const click = (i) => Math.exp(-t * 55 + i * 0.001) * 0.55;
+          d[i] =
+            (Math.random() * 2 - 1) * (click(0) + click(sr * 0.09)) * 0.7 +
+            Math.sin(2 * Math.PI * 900 * t) * Math.exp(-t * 50) * 0.3;
+        });
+        sfx.pickup = mkBuf(0.3, (d, i, t) => {
+          d[i] =
+            Math.sin(2 * Math.PI * (500 + (700 * t) / 0.3) * t) *
+            Math.exp(-t * 5) *
+            0.4;
+        });
+        sfx.vaccine = mkBuf(0.7, (d, i, t) => {
+          d[i] =
+            Math.sin(2 * Math.PI * (300 + (500 * t) / 0.7) * t) *
+            Math.exp(-t * 3) *
+            0.45;
+        });
+        sfx.wallhit = mkBuf(0.15, (d, i, t) => {
+          d[i] = (Math.random() * 2 - 1) * Math.exp(-t * 40) * 0.4;
+        });
+        sfx.wallbreak = mkBuf(0.4, (d, i, t) => {
+          d[i] =
+            (Math.random() * 2 - 1) * Math.exp(-t * 10) * 0.6 +
+            Math.sin(2 * Math.PI * 90 * t) * Math.exp(-t * 8) * 0.3;
+        });
+        sfx.door = mkBuf(0.35, (d, i, t) => {
+          d[i] =
+            (Math.random() * 2 - 1) * Math.exp(-t * 14) * 0.3 +
+            Math.sin(2 * Math.PI * 60 * t) * Math.exp(-t * 9) * 0.25;
+        });
+        sfx.heli = mkBuf(0.6, (d, i, t) => {
+          d[i] =
+            Math.sin(2 * Math.PI * 880 * t) * Math.exp(-t * 3) * 0.3 +
+            (Math.random() * 2 - 1) * 0.05;
+        });
+        sfx.alarm = mkBuf(0.5, (d, i, t) => {
+          d[i] =
+            Math.sin(2 * Math.PI * (700 + 80 * Math.sin(t * 20)) * t) *
+            Math.exp(-t * 2) *
+            0.35;
+        });
+        sfx.radio = mkBuf(0.55, (d, i, t) => {
+          d[i] =
+            Math.sin(2 * Math.PI * (220 + 30 * Math.sin(t * 30)) * t) *
+              Math.exp(-t * 2.2) *
+              0.4 +
+            (Math.random() * 2 - 1) * 0.05 * Math.exp(-t * 3);
+        });
+        sfx.footstep = mkBuf(0.12, (d, i, t) => {
+          d[i] =
+            (Math.random() * 2 - 1) * Math.exp(-t * 45) * 0.28 +
+            Math.sin(2 * Math.PI * 90 * t) * Math.exp(-t * 40) * 0.18;
+        });
+        sfx.alienGrowl = mkBuf(0.5, (d, i, t) => {
+          const fr = 90 + 40 * Math.sin(t * 9);
+          d[i] =
+            (Math.sin(2 * Math.PI * fr * t) * 0.5 +
+              (Math.random() * 2 - 1) * 0.28) *
+            Math.exp(-t * 3.2);
+        });
+        sfx.katana = mkBuf(0.35, (d, i, t) => {
+          const fr = 2200 - 1700 * (t / 0.35);
+          d[i] =
+            (Math.sin(2 * Math.PI * fr * t) * 0.5 +
+              (Math.random() * 2 - 1) * Math.exp(-t * 9) * 0.35) *
+            Math.exp(-t * 6.5);
+        });
+        sfx.boot = mkBuf(0.5, (d, i, t) => {
+          d[i] =
+            (Math.sin(2 * Math.PI * (220 + 180 * t) * t) * 0.4 +
+              Math.sin(2 * Math.PI * (440 + 360 * t) * t) * 0.25) *
+            Math.exp(-t * 3);
+        });
+        sfx.pause = mkBuf(0.15, (d, i, t) => {
+          d[i] = Math.sin(2 * Math.PI * 500 * t) * Math.exp(-t * 22) * 0.3;
+        });
+      }
+
+      // ── Input ────────────────────────────────────────────────────────────────────
+      const keys = new Set();
+      const mouse = { x: W / 2, y: H / 2, held: false, pressedEdge: false };
+      let escHeld = false;
+      addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        keys.add(k);
+        e.preventDefault();
+        if (k === "escape") {
+          if (!escHeld) {
+            escHeld = true;
+            if (game && !game.over && !game.won && !game.missed)
+              game.togglePause();
+          }
+          return;
+        }
+        if (game && game.paused) return;
+        if (["1", "2", "3"].includes(e.key) && game && !game.resolved())
+          game.switchWeapon(e.key);
+        if (k === "e" && game && !game.resolved()) game.tryInteract();
+        if (k === "h" && game && !game.resolved()) game.useMedkit();
+        if (k === "q" && game && !game.resolved()) game.useKatana();
+      });
+      addEventListener("keyup", (e) => {
+        const k = e.key.toLowerCase();
+        keys.delete(k);
+        if (k === "escape") escHeld = false;
+      });
+      canvas.addEventListener("mousemove", (e) => {
+        const r = canvas.getBoundingClientRect();
+        mouse.x = (e.clientX - r.left) * (W / r.width);
+        mouse.y = (e.clientY - r.top) * (H / r.height);
+      });
+      canvas.addEventListener("mousedown", (e) => {
+        if (e.button === 0) {
+          mouse.held = true;
+          mouse.pressedEdge = true;
+        }
+      });
+      canvas.addEventListener("mouseup", (e) => {
+        if (e.button === 0) mouse.held = false;
+      });
+
+      // ── Helpers ──────────────────────────────────────────────────────────────────
+      const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const rr = (a, b) => a + Math.random() * (b - a);
+      const ri = (a, b) => Math.floor(a + Math.random() * (b - a + 1));
+      function circleRect(cx, cy, cr, rx, ry, rw, rh) {
+        const nx = clamp(cx, rx, rx + rw),
+          ny = clamp(cy, ry, ry + rh);
+        const dx = cx - nx,
+          dy = cy - ny,
+          d2 = dx * dx + dy * dy;
+        return { hit: d2 < cr * cr, dx, dy, d: Math.sqrt(d2) || 0.0001 };
+      }
+      // shared collision resolver — slide along whichever axis is still free,
+      // so entities never feel "sticky" in doorways or corners
+      function slideAgainstWalls(x, y, prevX, prevY, radius, walls) {
+        let blocked = false;
+        for (const w of walls) {
+          if (w.alive && circleRect(x, y, radius, w.x, w.y, w.w, w.h).hit) {
+            blocked = true;
+            break;
+          }
+        }
+        if (!blocked) return { x, y, blocked: false };
+        let bx = x,
+          by = prevY,
+          okx = true;
+        for (const w of walls) {
+          if (w.alive && circleRect(bx, by, radius, w.x, w.y, w.w, w.h).hit) {
+            okx = false;
+            break;
+          }
+        }
+        let cx = prevX,
+          cy = y,
+          oky = true;
+        for (const w of walls) {
+          if (w.alive && circleRect(cx, cy, radius, w.x, w.y, w.w, w.h).hit) {
+            oky = false;
+            break;
+          }
+        }
+        return { x: okx ? bx : prevX, y: oky ? cy : prevY, blocked: true };
+      }
+
+      // ── Floor pre-render ─────────────────────────────────────────────────────────
+      let floorCanvas = null;
+      function buildFloor() {
+        floorCanvas = document.createElement("canvas");
+        floorCanvas.width = WW;
+        floorCanvas.height = WH;
+        const fc = floorCanvas.getContext("2d");
+        fc.fillStyle = "#0b0a09";
+        fc.fillRect(0, 0, WW, WH);
+        const cols = Math.ceil(WW / TILE) + 1,
+          rows = Math.ceil(WH / TILE) + 1;
+        for (let r = 0; r < rows; r++)
+          for (let c = 0; c < cols; c++) {
+            const x = c * TILE,
+              y = r * TILE;
+            const v = 23 + ri(0, 6);
+            const dark = ri(0, 11) < 1;
+            fc.fillStyle = dark
+              ? `rgb(${v - 8},${v - 8},${v - 6})`
+              : `rgb(${v},${v},${v + 2})`;
+            fc.fillRect(x + 1, y + 1, TILE - 2, TILE - 2);
+          }
+        fc.strokeStyle = "rgba(0,0,0,0.4)";
+        fc.lineWidth = 1;
+        for (let c = 0; c <= cols; c++) {
+          fc.beginPath();
+          fc.moveTo(c * TILE, 0);
+          fc.lineTo(c * TILE, WH);
+          fc.stroke();
+        }
+        for (let r = 0; r <= rows; r++) {
+          fc.beginPath();
+          fc.moveTo(0, r * TILE);
+          fc.lineTo(WW, r * TILE);
+          fc.stroke();
+        }
+        return floorCanvas;
+      }
+
+      // ── Weapons ──────────────────────────────────────────────────────────────────
+      const WEAPONS = {
+        pistol: {
+          name: "PISTOL",
+          dmg: 32,
+          fireRate: 0.26,
+          mag: 12,
+          reserve: 192,
+          spread: 0.025,
+          pellets: 1,
+          auto: false,
+          sndFile: "assets/pistol.mp3",
+          recoil: 4,
+          reloadTime: 0.8,
+        },
+        ar: {
+          name: "ASSAULT RIFLE",
+          dmg: 16,
+          fireRate: 0.085,
+          mag: 30,
+          reserve: 420,
+          spread: 0.055,
+          pellets: 1,
+          auto: true,
+          sndFile: "assets/ar.mp3",
+          recoil: 2,
+          reloadTime: 2.0,
+        },
+        shotgun: {
+          name: "SHOTGUN",
+          dmg: 11,
+          fireRate: 0.75,
+          mag: 6,
+          reserve: 84,
+          spread: 0.3,
+          pellets: 8,
+          auto: false,
+          sndFile: "assets/shotgun.mp3",
+          recoil: 10,
+          reloadTime: 2.4,
+        },
+      };
+      function drawWeaponIcon(ctx, name, x, y, scale) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        if (name === "pistol") {
+          ctx.fillStyle = "#222";
+          ctx.fillRect(0, 0, 26, 8);
+          ctx.fillStyle = "#111";
+          ctx.fillRect(4, 8, 7, 12);
+          ctx.fillStyle = "#333";
+          ctx.fillRect(22, 2, 5, 4);
+        } else if (name === "ar") {
+          ctx.fillStyle = "#2a2a2a";
+          ctx.fillRect(0, 3, 40, 6);
+          ctx.fillStyle = "#111";
+          ctx.fillRect(6, 9, 7, 11);
+          ctx.fillStyle = "#444";
+          ctx.fillRect(30, 0, 4, 4);
+          ctx.fillStyle = "#5a3d1e";
+          ctx.fillRect(-8, 4, 9, 5);
+          ctx.fillStyle = "#111";
+          ctx.fillRect(14, 9, 4, 10);
+        } else {
+          ctx.fillStyle = "#3a2a1a";
+          ctx.fillRect(0, 2, 34, 9);
+          ctx.fillStyle = "#181818";
+          ctx.fillRect(4, 11, 8, 10);
+          ctx.fillStyle = "#222";
+          ctx.fillRect(28, 0, 6, 5);
+          ctx.fillRect(28, 8, 6, 5);
+        }
+        ctx.restore();
+      }
+
+      // ── Game bootstrap ───────────────────────────────────────────────────────────
+      let game = null,
+        lastTime = 0;
+      function startGame() {
+        initAudio();
+        buildSounds();
+        buildFloor();
+        startBgm();
+        playBuf(sfx.boot, 0.6);
+        game = new Game();
+        requestAnimationFrame(loop);
+      }
+      function loop(ts) {
+        const dt = Math.min((ts - lastTime) / 1000, 0.05);
+        lastTime = ts;
+        game.update(dt);
+        game.draw();
+        requestAnimationFrame(loop);
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  PLAYER
+      // ═══════════════════════════════════════════════════════════════════════════
+      class Player {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.angle = 0;
+          this.speed = 185;
+          this.radius = 14;
+          this.hp = 200;
+          this.maxHp = 200; // doubled from the original 100
+          this.armor = 0;
+          this.maxArmor = 100;
+          this.medkits = 1;
+          this.katanaCharges = 3;
+          this.weapon = "pistol";
+          this.ammo = {};
+          for (const k in WEAPONS)
+            this.ammo[k] = { mag: WEAPONS[k].mag, reserve: WEAPONS[k].reserve };
+          this.reloading = false;
+          this.reloadTimer = 0;
+          this.invTimer = 0;
+          this.legTimer = 0;
+          this.moving = false;
+          this.recoilOffset = 0;
+        }
+        get cfg() {
+          return WEAPONS[this.weapon];
+        }
+        reload() {
+          const a = this.ammo[this.weapon];
+          if (a.reserve <= 0 || a.mag >= this.cfg.mag || this.reloading) return;
+          this.reloading = true;
+          this.reloadTimer = this.cfg.reloadTime;
+          playFile("assets/reload.mp3", 0.7);
+        }
+        switchWeapon(name) {
+          if (name === this.weapon) return;
+          this.weapon = name;
+          this.reloading = false;
+          this.reloadTimer = 0;
+        }
+        update(dt, wm, walls) {
+          this.angle = Math.atan2(wm.y - this.y, wm.x - this.x);
+          let dx = 0,
+            dy = 0;
+          if (keys.has("w") || keys.has("arrowup")) dy -= 1;
+          if (keys.has("s") || keys.has("arrowdown")) dy += 1;
+          if (keys.has("a") || keys.has("arrowleft")) dx -= 1;
+          if (keys.has("d") || keys.has("arrowright")) dx += 1;
+          const ln = Math.hypot(dx, dy);
+          if (ln > 0) {
+            dx /= ln;
+            dy /= ln;
+          }
+          const prevX = this.x,
+            prevY = this.y;
+          const nx = clamp(this.x + dx * this.speed * dt, 20, WW - 20),
+            ny = clamp(this.y + dy * this.speed * dt, 20, WH - 20);
+          const res = slideAgainstWalls(
+            nx,
+            ny,
+            prevX,
+            prevY,
+            this.radius,
+            walls,
+          );
+          this.x = res.x;
+          this.y = res.y;
+          this.moving = ln > 0;
+          if (this.moving) this.legTimer += dt * 6;
+          this.invTimer = Math.max(0, this.invTimer - dt);
+          this.recoilOffset = Math.max(0, this.recoilOffset - dt * 60);
+          if (this.reloading) {
+            this.reloadTimer -= dt;
+            if (this.reloadTimer <= 0) {
+              this.reloading = false;
+              const a = this.ammo[this.weapon],
+                need = this.cfg.mag - a.mag,
+                take = Math.min(need, a.reserve);
+              a.mag += take;
+              a.reserve -= take;
+              playBuf(sfx.empty, 0.4, 300);
+            }
+          }
+          if (keys.has("r") && !this.reloading) this.reload();
+        }
+        takeDamage(dmg) {
+          if (this.armor > 0) {
+            const absorb = Math.min(this.armor, dmg);
+            this.armor -= absorb;
+            dmg -= absorb;
+          }
+          this.hp -= dmg;
+        }
+        draw(ctx, sx, sy) {
+          if (this.invTimer > 0 && Math.floor(this.invTimer * 14) % 2 === 0)
+            return;
+          const img = IMG.hunter,
+            size = 62;
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.fillStyle = "rgba(0,0,0,0.38)";
+          ctx.beginPath();
+          ctx.ellipse(4, 8, 17, 10, 0, 0, Math.PI * 2);
+          ctx.fill();
+          if (this.armor > 0) {
+            ctx.fillStyle = "rgba(60,160,255,0.22)";
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.58, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "rgba(120,200,255,0.75)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.55, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.rotate(this.angle);
+          ctx.translate(-this.recoilOffset, 0);
+          if (img && img.complete && img.naturalWidth > 0)
+            ctx.drawImage(img, -size / 2, -size / 2, size, size);
+          else {
+            ctx.fillStyle = "#3b5a3b";
+            ctx.beginPath();
+            ctx.arc(0, 0, 13, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  BULLET
+      // ═══════════════════════════════════════════════════════════════════════════
+      class Bullet {
+        constructor(x, y, vx, vy, dmg) {
+          this.x = x;
+          this.y = y;
+          this.vx = vx;
+          this.vy = vy;
+          this.damage = dmg;
+          this.alive = true;
+          this.trail = [];
+          this.life = 1.8;
+        }
+        update(dt) {
+          this.trail.push({ x: this.x, y: this.y });
+          if (this.trail.length > 7) this.trail.shift();
+          this.x += this.vx * dt;
+          this.y += this.vy * dt;
+          this.life -= dt;
+          if (
+            this.x < 0 ||
+            this.x > WW ||
+            this.y < 0 ||
+            this.y > WH ||
+            this.life <= 0
+          )
+            this.alive = false;
+        }
+        draw(ctx, sx, sy, cam) {
+          const a = Math.atan2(this.vy, this.vx);
+          ctx.save();
+          for (let i = 0; i < this.trail.length; i++) {
+            const t = (i + 1) / this.trail.length;
+            const tx = this.trail[i].x - cam.x,
+              ty = this.trail[i].y - cam.y;
+            ctx.globalAlpha = t * 0.4;
+            ctx.fillStyle = "#ffee44";
+            ctx.beginPath();
+            ctx.arc(tx, ty, 1.5 * t, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.globalAlpha = 1;
+          ctx.translate(sx, sy);
+          ctx.rotate(a);
+          ctx.fillStyle = "#ffffaa";
+          ctx.beginPath();
+          ctx.ellipse(0, 0, 9, 2.2, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#fff";
+          ctx.beginPath();
+          ctx.ellipse(3, 0, 4.5, 1.3, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  ALIENS
+      // ═══════════════════════════════════════════════════════════════════════════
+      const ADEFS = {
+        runner: {
+          r: 17,
+          hp: 35,
+          spd: 150,
+          dmg: 12,
+          sv: 10,
+          bl: [0, 180, 0],
+          img: "runner",
+          size: 52,
+          wallDps: 35,
+        },
+        crawler: {
+          r: 23,
+          hp: 85,
+          spd: 95,
+          dmg: 18,
+          sv: 25,
+          bl: [170, 0, 210],
+          img: "crawler",
+          size: 68,
+          wallDps: 55,
+        },
+        tank: {
+          r: 36,
+          hp: 210,
+          spd: 52,
+          dmg: 32,
+          sv: 60,
+          bl: [210, 55, 0],
+          img: "tank",
+          size: 100,
+          wallDps: 110,
+        },
+      };
+      class Alien {
+        constructor(x, y, type, boost = 1) {
+          this.x = x;
+          this.y = y;
+          this.type = type;
+          this.alive = true;
+          const d = ADEFS[type];
+          this.radius = d.r;
+          this.hp = d.hp * boost;
+          this.maxHp = this.hp;
+          this.spd = d.spd * (1 + (boost - 1) * 0.4);
+          this.dmg = d.dmg * boost;
+          this.sv = d.sv;
+          this.bl = d.bl;
+          this.img = d.img;
+          this.size = d.size;
+          this.wallDps = d.wallDps;
+          this.angle = 0;
+          this.at = Math.random() * Math.PI * 2;
+          this.lt = Math.random() * Math.PI * 2;
+          this.hitFlash = 0;
+        }
+        update(dt, px, py, walls) {
+          const dx = px - this.x,
+            dy = py - this.y,
+            d = Math.hypot(dx, dy);
+          let mx = 0,
+            my = 0;
+          if (d > 0) {
+            mx = (dx / d) * this.spd * dt;
+            my = (dy / d) * this.spd * dt;
+          }
+          const prevX = this.x,
+            prevY = this.y;
+          const res = slideAgainstWalls(
+            this.x + mx,
+            this.y + my,
+            prevX,
+            prevY,
+            this.radius,
+            walls,
+          );
+          this.x = res.x;
+          this.y = res.y;
+          if (res.blocked && res.x === prevX && res.y === prevY) {
+            // fully stuck — chew through a breakable wall if one is in the way
+            for (const w of walls) {
+              if (!w.alive || !w.breakable) continue;
+              if (
+                circleRect(
+                  this.x + mx,
+                  this.y + my,
+                  this.radius,
+                  w.x,
+                  w.y,
+                  w.w,
+                  w.h,
+                ).hit
+              ) {
+                w.hp -= this.wallDps * dt;
+                if (w.hp <= 0) {
+                  w.alive = false;
+                  playBuf(sfx.wallbreak, 0.5);
+                }
+                break;
+              }
+            }
+          }
+          this.angle = Math.atan2(dy, dx);
+          this.at += dt * 2.5;
+          this.lt += dt * 7;
+          this.hitFlash = Math.max(0, this.hitFlash - dt * 8);
+        }
+        draw(ctx, sx, sy) {
+          ctx.save();
+          ctx.translate(sx, sy);
+          const bob = this.type === "tank" ? 0 : Math.sin(this.at) * 2.5;
+          ctx.translate(0, bob);
+          ctx.rotate(this.angle + Math.PI / 2);
+          ctx.fillStyle = "rgba(0,0,0,0.3)";
+          ctx.beginPath();
+          ctx.ellipse(
+            3,
+            this.size * 0.28,
+            this.radius + 3,
+            this.radius * 0.7,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+          const img = IMG[this.img];
+          if (img && img.complete && img.naturalWidth > 0)
+            ctx.drawImage(
+              img,
+              -this.size / 2,
+              -this.size / 2,
+              this.size,
+              this.size,
+            );
+          else {
+            ctx.fillStyle = "#660000";
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          if (this.hitFlash > 0) {
+            ctx.globalAlpha = this.hitFlash * 0.8;
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+          ctx.restore();
+          ctx.save();
+          ctx.translate(sx, sy);
+          if (this.hp < this.maxHp) {
+            const bw = this.radius * 2.6,
+              by = -this.size * 0.55 - 10;
+            ctx.fillStyle = "#400";
+            ctx.fillRect(-bw / 2, by, bw, 6);
+            ctx.fillStyle = this.hp / this.maxHp > 0.5 ? "#0c0" : "#f80";
+            ctx.fillRect(-bw / 2, by, bw * (this.hp / this.maxHp), 6);
+            ctx.strokeStyle = "#222";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(-bw / 2, by, bw, 6);
+          }
+          ctx.restore();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  WALLS — structural (indestructible) or breakable barricade
+      // ═══════════════════════════════════════════════════════════════════════════
+      class Wall {
+        constructor(x, y, w, h, breakable = false, damaged = false) {
+          this.x = x;
+          this.y = y;
+          this.w = w;
+          this.h = h;
+          this.breakable = breakable;
+          this.damaged = damaged;
+          this.hp = breakable ? 170 : Infinity;
+          this.maxHp = this.hp;
+          this.alive = true;
+        }
+        draw(ctx, cam) {
+          if (!this.alive) return;
+          const sx = this.x - cam.x,
+            sy = this.y - cam.y;
+          if (sx + this.w < 0 || sx > W || sy + this.h < 0 || sy > H) return;
+          if (!this.breakable) {
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fillRect(sx + 3, sy + 3, this.w, this.h);
+            const g = ctx.createLinearGradient(sx, sy, sx, sy + this.h);
+            g.addColorStop(0, "#82878a");
+            g.addColorStop(1, "#54595c");
+            ctx.fillStyle = g;
+            ctx.fillRect(sx, sy, this.w, this.h);
+            ctx.strokeStyle = "#33373a";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(sx, sy, this.w, this.h);
+            if (this.damaged) {
+              ctx.strokeStyle = "rgba(0,0,0,0.45)";
+              ctx.lineWidth = 1.2;
+              for (let i = 0; i < 3; i++) {
+                const cx = sx + rr(6, Math.max(6, this.w - 6)),
+                  cy = sy + rr(6, Math.max(6, this.h - 6));
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + rr(-10, 10), cy + rr(-10, 10));
+                ctx.stroke();
+              }
+            }
+            return;
+          }
+          const dmg = 1 - this.hp / this.maxHp;
+          ctx.fillStyle = "rgba(0,0,0,0.35)";
+          ctx.fillRect(sx + 4, sy + 4, this.w, this.h);
+          const g = ctx.createLinearGradient(sx, sy, sx, sy + this.h);
+          g.addColorStop(0, "#6b6459");
+          g.addColorStop(1, "#46423a");
+          ctx.fillStyle = g;
+          ctx.fillRect(sx, sy, this.w, this.h);
+          ctx.strokeStyle = "#2a2722";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx, sy, this.w, this.h);
+          if (dmg > 0.15) {
+            ctx.strokeStyle = "rgba(0,0,0,0.5)";
+            ctx.lineWidth = 1.4;
+            const cracks = Math.floor(dmg * 6);
+            for (let i = 0; i < cracks; i++) {
+              const cx = sx + rr(4, this.w - 4),
+                cy = sy + rr(4, this.h - 4);
+              ctx.beginPath();
+              ctx.moveTo(cx, cy);
+              ctx.lineTo(cx + rr(-14, 14), cy + rr(-14, 14));
+              ctx.stroke();
+            }
+          }
+          if (this.hp < this.maxHp) {
+            ctx.fillStyle = "#300";
+            ctx.fillRect(sx, sy - 8, this.w, 4);
+            ctx.fillStyle = "#c33";
+            ctx.fillRect(sx, sy - 8, this.w * (this.hp / this.maxHp), 4);
+          }
+        }
+      }
+      // solid segments spanning [start,end] at a fixed coord, skipping gap intervals (doorways)
+      function wallRun(orientation, fixed, start, end, thickness, gaps) {
+        const sorted = [...gaps].sort((a, b) => a[0] - b[0]);
+        const segs = [];
+        let cursor = start;
+        for (const [gs, ge] of sorted) {
+          if (gs > cursor) segs.push([cursor, gs]);
+          cursor = Math.max(cursor, ge);
+        }
+        if (cursor < end) segs.push([cursor, end]);
+        return segs.map(([a, b]) => {
+          const damaged = Math.random() < 0.18;
+          return orientation === "h"
+            ? new Wall(a, fixed, b - a, thickness, false, damaged)
+            : new Wall(fixed, a, thickness, b - a, false, damaged);
+        });
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  DOORS — purely visual + trigger (never block movement)
+      // ═══════════════════════════════════════════════════════════════════════════
+      class Door {
+        constructor(x, y, w, h, room, vertical) {
+          this.x = x;
+          this.y = y;
+          this.w = w;
+          this.h = h;
+          this.room = room;
+          this.vertical = vertical;
+          this.open = false;
+        }
+        draw(ctx, cam) {
+          const sx = this.x - cam.x,
+            sy = this.y - cam.y;
+          if (
+            sx + this.w < -40 ||
+            sx > W + 40 ||
+            sy + this.h < -40 ||
+            sy > H + 40
+          )
+            return;
+          if (this.open) {
+            ctx.fillStyle = "rgba(0,0,0,0.55)";
+            ctx.fillRect(sx, sy, this.w, this.h);
+            return;
+          }
+          ctx.fillStyle = "#5a3a2a";
+          ctx.fillRect(sx, sy, this.w, this.h);
+          ctx.strokeStyle = "#2a1a10";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(sx, sy, this.w, this.h);
+          ctx.fillStyle = "#c9a028";
+          if (this.vertical)
+            ctx.fillRect(sx + this.w - 6, sy + this.h / 2 - 2, 4, 4);
+          else ctx.fillRect(sx + this.w / 2 - 2, sy + this.h - 6, 4, 4);
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  FURNITURE — atmosphere-only props: signage, the radio prop, the exit door
+      //  and flickering lights.
+      // ═══════════════════════════════════════════════════════════════════════════
+      class Furniture {
+        constructor(x, y, type, extra = {}) {
+          this.x = x;
+          this.y = y;
+          this.type = type;
+          this.extra = extra;
+          this.t = Math.random() * 10;
+        }
+        update(dt) {
+          this.t += dt;
+        }
+        draw(ctx, cam) {
+          const sx = this.x - cam.x,
+            sy = this.y - cam.y;
+          if (sx < -140 || sx > W + 140 || sy < -140 || sy > H + 140) return;
+          ctx.save();
+          ctx.translate(sx, sy);
+          switch (this.type) {
+            case "sign":
+              ctx.fillStyle = this.extra.color || "#aa1111";
+              ctx.fillRect(-22, -10, 44, 20);
+              ctx.strokeStyle = "#000";
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(-22, -10, 44, 20);
+              ctx.fillStyle = "#fff";
+              ctx.font = "bold 10px Poppins";
+              ctx.textAlign = "center";
+              ctx.fillText(this.extra.text || "EXIT", 0, 4);
+              ctx.textAlign = "left";
+              break;
+            case "radio":
+              ctx.fillStyle = "#2a2a2a";
+              ctx.fillRect(-18, -14, 36, 26);
+              ctx.strokeStyle = "#111";
+              ctx.lineWidth = 2;
+              ctx.strokeRect(-18, -14, 36, 26);
+              ctx.strokeStyle = "#888";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(0, -14);
+              ctx.lineTo(0, -34);
+              ctx.stroke();
+              ctx.fillStyle = Math.sin(this.t * 6) > 0 ? "#ff3333" : "#661111";
+              ctx.beginPath();
+              ctx.arc(8, -4, 4, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "#333";
+              ctx.fillRect(-12, -8, 16, 4);
+              break;
+            case "exitdoor":
+              ctx.fillStyle = "#2a3a2a";
+              ctx.fillRect(-30, -42, 60, 84);
+              ctx.strokeStyle = "#111";
+              ctx.lineWidth = 3;
+              ctx.strokeRect(-30, -42, 60, 84);
+              ctx.fillStyle = Math.sin(this.t * 3) > 0 ? "#2fff6a" : "#1a5a2a";
+              ctx.beginPath();
+              ctx.arc(0, 0, 6, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "#0a0";
+              ctx.font = "bold 9px Poppins";
+              ctx.textAlign = "center";
+              ctx.fillText("EXIT", 0, -52);
+              ctx.textAlign = "left";
+              break;
+            case "lightflicker": {
+              const a =
+                0.06 + Math.abs(Math.sin(this.t * 9) * Math.random()) * 0.08;
+              const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 150);
+              g.addColorStop(0, `rgba(255,250,220,${a})`);
+              g.addColorStop(1, "rgba(255,250,220,0)");
+              ctx.fillStyle = g;
+              ctx.beginPath();
+              ctx.arc(0, 0, 150, 0, Math.PI * 2);
+              ctx.fill();
+              break;
+            }
+          }
+          ctx.restore();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  POWER-UPS
+      // ═══════════════════════════════════════════════════════════════════════════
+      class PowerUp {
+        constructor(x, y, type) {
+          this.x = x;
+          this.y = y;
+          this.type = type;
+          this.alive = true;
+          this.t = 0;
+        }
+        update(dt) {
+          this.t += dt;
+        }
+        draw(ctx, sx, sy) {
+          const bob = Math.sin(this.t * 3) * 4;
+          ctx.save();
+          ctx.translate(sx, sy + bob);
+          const glow =
+            this.type === "health"
+              ? "rgba(0,255,90,0.35)"
+              : "rgba(60,160,255,0.35)";
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(0, 0, 22, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "rgba(0,0,0,0.4)";
+          ctx.beginPath();
+          ctx.arc(0, 0, 16, 0, Math.PI * 2);
+          ctx.fill();
+          if (this.type === "health") {
+            ctx.fillStyle = "#1fdd55";
+            ctx.fillRect(-3, -10, 6, 20);
+            ctx.fillRect(-10, -3, 20, 6);
+            ctx.strokeStyle = "#0a5";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(-3, -10, 6, 20);
+            ctx.strokeRect(-10, -3, 20, 6);
+          } else {
+            ctx.strokeStyle = "#4ab0ff";
+            ctx.fillStyle = "#2a80e0";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+              const a = (i / 6) * Math.PI * 2 - Math.PI / 2;
+              const px = Math.cos(a) * 11,
+                py = Math.sin(a) * 11;
+              i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+      class Vaccine {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.t = 0;
+          this.collected = false;
+        }
+        update(dt) {
+          this.t += dt;
+        }
+        draw(ctx, sx, sy) {
+          if (this.collected) return;
+          const bob = Math.sin(this.t * 2.4) * 5;
+          ctx.save();
+          ctx.translate(sx, sy + bob);
+          ctx.fillStyle = `rgba(255,230,60,${0.3 + 0.15 * Math.sin(this.t * 4)})`;
+          ctx.beginPath();
+          ctx.arc(0, 0, 26, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#ffe23c";
+          ctx.fillRect(-6, -13, 12, 22);
+          ctx.strokeStyle = "#c9a800";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(-6, -13, 12, 22);
+          ctx.fillStyle = "#7a6600";
+          ctx.fillRect(-4, -17, 8, 5);
+          ctx.fillStyle = "rgba(255,255,255,0.6)";
+          ctx.fillRect(-3, -8, 3, 14);
+          ctx.restore();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  EFFECTS
+      // ═══════════════════════════════════════════════════════════════════════════
+      class BloodParticle {
+        constructor(x, y, isGib, col) {
+          this.x = x;
+          this.y = y;
+          const a = Math.random() * Math.PI * 2;
+          const sp = isGib ? rr(50, 180) : rr(25, 90);
+          this.vx = Math.cos(a) * sp;
+          this.vy = Math.sin(a) * sp;
+          this.life = rr(0.4, 1.1);
+          this.ml = this.life;
+          this.size = isGib ? rr(3.5, 8) : rr(2, 5.5);
+          const [r, g, b] = col;
+          const dv = ri(-25, 25);
+          this.col = `rgb(${clamp(r + dv, 0, 255)},${clamp(g + dv, 0, 255)},${clamp(b + dv, 0, 255)})`;
+          this.alive = true;
+        }
+        update(dt) {
+          this.x += this.vx * dt;
+          this.y += this.vy * dt;
+          this.vx *= 1 - dt * 3.5;
+          this.vy *= 1 - dt * 3.5;
+          this.vy += 55 * dt;
+          this.life -= dt;
+          if (this.life <= 0) this.alive = false;
+        }
+        draw(ctx, sx, sy) {
+          const t = this.life / this.ml;
+          ctx.globalAlpha = t * 0.88;
+          ctx.fillStyle = this.col;
+          ctx.beginPath();
+          ctx.arc(sx, sy, Math.max(0.5, this.size * t), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+      }
+      class MuzzleFlash {
+        constructor(x, y, a) {
+          this.x = x;
+          this.y = y;
+          this.a = a;
+          this.life = 0.065;
+          this.ml = 0.065;
+          this.alive = true;
+        }
+        update(dt) {
+          this.life -= dt;
+          if (this.life <= 0) this.alive = false;
+        }
+        draw(ctx, sx, sy) {
+          const t = this.life / this.ml;
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.rotate(this.a);
+          ctx.globalAlpha = t * 0.85;
+          for (let i = 0; i < 6; i++) {
+            ctx.save();
+            ctx.rotate((i * Math.PI) / 3);
+            ctx.fillStyle = "#ffcc00";
+            ctx.beginPath();
+            ctx.ellipse(12 * t, 0, 18 * t, 2.5 * t, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+          ctx.fillStyle = "#ffffff";
+          ctx.globalAlpha = t;
+          ctx.beginPath();
+          ctx.ellipse(10 * t, 0, 14 * t, 7 * t, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = "#ffff80";
+          ctx.beginPath();
+          ctx.arc(0, 0, 8 * t, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+      }
+      class ShellCasing {
+        constructor(x, y, a) {
+          this.x = x;
+          this.y = y;
+          const ea = a + Math.PI / 2 + (Math.random() - 0.5) * 0.5;
+          const sp = rr(70, 140);
+          this.vx = Math.cos(ea) * sp;
+          this.vy = Math.sin(ea) * sp;
+          this.rot = Math.random() * Math.PI * 2;
+          this.spin = (Math.random() - 0.5) * 18;
+          this.life = rr(0.9, 1.8);
+          this.ml = this.life;
+          this.alive = true;
+        }
+        update(dt) {
+          this.x += this.vx * dt;
+          this.y += this.vy * dt;
+          this.vx *= 1 - dt * 4.5;
+          this.vy *= 1 - dt * 4.5;
+          this.rot += this.spin * dt;
+          this.life -= dt;
+          if (this.life <= 0) this.alive = false;
+        }
+        draw(ctx, sx, sy) {
+          const t = Math.min(1, (this.life / this.ml) * 4);
+          ctx.save();
+          ctx.translate(sx, sy);
+          ctx.rotate(this.rot);
+          ctx.globalAlpha = t * 0.9;
+          ctx.fillStyle = "#c8a000";
+          ctx.fillRect(-4.5, -2, 9, 4);
+          ctx.fillStyle = "#ffcc00";
+          ctx.fillRect(-4.5, -1.5, 3.5, 3);
+          ctx.fillStyle = "#aa8800";
+          ctx.fillRect(4, -2, 1, 4);
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+      }
+      class Spark {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.life = 0.25;
+          this.ml = 0.25;
+          this.alive = true;
+          this.a = Math.random() * Math.PI * 2;
+        }
+        update(dt) {
+          this.life -= dt;
+          if (this.life <= 0) this.alive = false;
+        }
+        draw(ctx, sx, sy) {
+          const t = this.life / this.ml;
+          ctx.globalAlpha = t;
+          ctx.strokeStyle = "#ffcc66";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(sx, sy);
+          ctx.lineTo(
+            sx + Math.cos(this.a) * 8 * t,
+            sy + Math.sin(this.a) * 8 * t,
+          );
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+      class KatanaSlash {
+        constructor(x, y, radius) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.life = 0.4;
+          this.ml = 0.4;
+          this.alive = true;
+        }
+        update(dt) {
+          this.life -= dt;
+          if (this.life <= 0) this.alive = false;
+        }
+        draw(ctx, sx, sy) {
+          const t = this.life / this.ml;
+          ctx.save();
+          ctx.globalAlpha = t * 0.9;
+          ctx.strokeStyle = "#bfe8ff";
+          ctx.lineWidth = 4 * t + 1;
+          ctx.beginPath();
+          ctx.arc(sx, sy, this.radius * (1 - t * 0.4), 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(sx, sy, this.radius * (1 - t * 0.4) * 0.6, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.restore();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  HOSPITAL MAP — a loop corridor around a sealed core, with one shortcut
+      //  cutting straight through the middle. Rooms hang off all four sides.
+      // ═══════════════════════════════════════════════════════════════════════════
+      const DOOR_W = 130;
+
+      const NORTH_ROOMS = [
+        // rooms above the top corridor
+        {
+          id: "reception",
+          name: "RECEPTION",
+          x: 460,
+          y: 20,
+          w: 760,
+          h: 400,
+          aliens: [],
+          decor: [["sign", 700, 40, { text: "INFO" }]],
+          light: "normal",
+        },
+        {
+          id: "waitinghall",
+          name: "WAITING HALL",
+          x: 1320,
+          y: 20,
+          w: 760,
+          h: 400,
+          aliens: [["runner", 3]],
+          decor: [],
+          light: "normal",
+        },
+        {
+          id: "laboratory",
+          name: "LABORATORY",
+          x: 2180,
+          y: 20,
+          w: 760,
+          h: 400,
+          aliens: [
+            ["crawler", 2],
+            ["tank", 1],
+          ],
+          decor: [["sign", 680, 40, { text: "LAB", color: "#661166" }]],
+          light: "red",
+        },
+      ];
+      const SOUTH_ROOMS = [
+        // rooms below the bottom corridor
+        {
+          id: "pharmacy",
+          name: "PHARMACY",
+          x: 460,
+          y: 2420,
+          w: 520,
+          h: 400,
+          aliens: [["runner", 2]],
+          decor: [["sign", 260, 40, { text: "RX" }]],
+          light: "dim",
+        },
+        {
+          id: "storage",
+          name: "STORAGE",
+          x: 1060,
+          y: 2420,
+          w: 520,
+          h: 400,
+          aliens: [],
+          decor: [],
+          light: "dim",
+        },
+        {
+          id: "generatorroom",
+          name: "GENERATOR ROOM",
+          x: 1660,
+          y: 2420,
+          w: 520,
+          h: 400,
+          aliens: [
+            ["tank", 1],
+            ["crawler", 1],
+          ],
+          decor: [
+            ["sign", 260, 40, { text: "HIGH VOLTAGE", color: "#aa7700" }],
+          ],
+          light: "red",
+        },
+        {
+          id: "exitcorridor",
+          name: "EXIT CORRIDOR",
+          x: 2260,
+          y: 2420,
+          w: 680,
+          h: 400,
+          aliens: [],
+          isExit: true,
+          decor: [["exitdoor", 600, 220]],
+          light: "normal",
+        },
+      ];
+      const WEST_ROOMS = [
+        // rooms left of the left corridor
+        {
+          id: "securityroom",
+          name: "SECURITY ROOM",
+          x: 20,
+          y: 460,
+          w: 400,
+          h: 900,
+          aliens: [["runner", 1]],
+          decor: [["sign", 200, 60, { text: "SEC" }]],
+          light: "dim",
+        },
+        {
+          id: "radioroom",
+          name: "RADIO ROOM",
+          x: 20,
+          y: 1460,
+          w: 400,
+          h: 900,
+          aliens: [],
+          isRadio: true,
+          decor: [
+            ["radio", 200, 300],
+            ["sign", 200, 60, { text: "COMMS", color: "#227722" }],
+          ],
+          light: "normal",
+        },
+      ];
+      const EAST_ROOMS = [
+        // rooms right of the right corridor
+        {
+          id: "icu",
+          name: "ICU",
+          x: 2960,
+          y: 460,
+          w: 400,
+          h: 900,
+          aliens: [
+            ["crawler", 3],
+            ["runner", 2],
+          ],
+          decor: [["sign", 200, 60, { text: "ICU", color: "#661111" }]],
+          light: "red",
+        },
+        {
+          id: "emergencyward",
+          name: "EMERGENCY WARD",
+          x: 2960,
+          y: 1460,
+          w: 400,
+          h: 900,
+          aliens: [
+            ["runner", 3],
+            ["crawler", 1],
+          ],
+          decor: [["sign", 200, 60, { text: "ER", color: "#aa1111" }]],
+          light: "red",
+        },
+      ];
+
+      const LOOP = { x: 420, y: 420, w: 2540, h: 2000 }; // outer loop bounding box
+      const CORE = { x: 560, y: 560, w: 2260, h: 1720 }; // sealed interior core
+      const SHORTCUT_GAP = [1560, 1700];
+
+      function buildHospital() {
+        const structural = [],
+          barricades = [],
+          doors = [],
+          furniture = [],
+          rooms = [];
+        const T = 12;
+        const northGaps = [],
+          southGaps = [],
+          westGaps = [],
+          eastGaps = [];
+
+        function room(def) {
+          const rm = { ...def, spawned: false };
+          rooms.push(rm);
+          for (const [type, fx, fy, extra] of def.decor)
+            furniture.push(
+              new Furniture(def.x + fx, def.y + fy, type, extra || {}),
+            );
+          if (def.light !== "normal")
+            furniture.push(
+              new Furniture(
+                def.x + def.w / 2,
+                def.y + def.h / 2,
+                "lightflicker",
+              ),
+            );
+          return rm;
+        }
+
+        for (const def of NORTH_ROOMS) {
+          const rm = room(def);
+          const { x, y, w, h } = def;
+          const gx0 = x + w / 2 - DOOR_W / 2,
+            gx1 = gx0 + DOOR_W;
+          structural.push(new Wall(x, y, w, T));
+          structural.push(new Wall(x, y, T, h));
+          structural.push(new Wall(x + w - T, y, T, h));
+          northGaps.push([gx0, gx1]);
+          doors.push(new Door(gx0, y + h - T, DOOR_W, T * 2, rm, false));
+        }
+        for (const def of SOUTH_ROOMS) {
+          const rm = room(def);
+          const { x, y, w, h } = def;
+          const gx0 = x + w / 2 - DOOR_W / 2,
+            gx1 = gx0 + DOOR_W;
+          structural.push(new Wall(x, y + h - T, w, T));
+          structural.push(new Wall(x, y, T, h));
+          structural.push(new Wall(x + w - T, y, T, h));
+          southGaps.push([gx0, gx1]);
+          doors.push(new Door(gx0, y - T, DOOR_W, T * 2, rm, false));
+        }
+        for (const def of WEST_ROOMS) {
+          const rm = room(def);
+          const { x, y, w, h } = def;
+          const gy0 = y + h / 2 - DOOR_W / 2,
+            gy1 = gy0 + DOOR_W;
+          structural.push(new Wall(x, y, T, h));
+          structural.push(new Wall(x, y, w, T));
+          structural.push(new Wall(x, y + h - T, w, T));
+          westGaps.push([gy0, gy1]);
+          doors.push(new Door(x + w - T, gy0, T * 2, DOOR_W, rm, true));
+        }
+        for (const def of EAST_ROOMS) {
+          const rm = room(def);
+          const { x, y, w, h } = def;
+          const gy0 = y + h / 2 - DOOR_W / 2,
+            gy1 = gy0 + DOOR_W;
+          structural.push(new Wall(x + w - T, y, T, h));
+          structural.push(new Wall(x, y, w, T));
+          structural.push(new Wall(x, y + h - T, w, T));
+          eastGaps.push([gy0, gy1]);
+          doors.push(new Door(x - T, gy0, T * 2, DOOR_W, rm, true));
+        }
+
+        // loop corridors: outer edges are the hospital's outer wall, inner edges
+        // (facing the sealed core) are solid except at each room's doorway
+        structural.push(
+          ...wallRun("h", LOOP.y, LOOP.x, LOOP.x + LOOP.w, T, northGaps),
+        ); // top corridor outer
+        structural.push(
+          ...wallRun(
+            "h",
+            LOOP.y + LOOP.h - T,
+            LOOP.x,
+            LOOP.x + LOOP.w,
+            T,
+            southGaps,
+          ),
+        ); // bottom corridor outer
+        structural.push(
+          ...wallRun("v", LOOP.x, LOOP.y, LOOP.y + LOOP.h, T, westGaps),
+        ); // left corridor outer
+        structural.push(
+          ...wallRun(
+            "v",
+            LOOP.x + LOOP.w - T,
+            LOOP.y,
+            LOOP.y + LOOP.h,
+            T,
+            eastGaps,
+          ),
+        ); // right corridor outer
+
+        // sealed core, punched through by the vertical shortcut
+        structural.push(
+          ...wallRun("h", CORE.y, CORE.x, CORE.x + CORE.w, T, [SHORTCUT_GAP]),
+        );
+        structural.push(
+          ...wallRun("h", CORE.y + CORE.h - T, CORE.x, CORE.x + CORE.w, T, [
+            SHORTCUT_GAP,
+          ]),
+        );
+        structural.push(new Wall(CORE.x, CORE.y, T, CORE.h));
+        structural.push(new Wall(CORE.x + CORE.w - T, CORE.y, T, CORE.h));
+        structural.push(new Wall(SHORTCUT_GAP[0], CORE.y, T, CORE.h));
+        structural.push(new Wall(SHORTCUT_GAP[1] - T, CORE.y, T, CORE.h));
+
+        // breakable barricade sealing the shortcut at first — a secret route once broken open
+        barricades.push(
+          new Wall(
+            SHORTCUT_GAP[0],
+            1360,
+            SHORTCUT_GAP[1] - SHORTCUT_GAP[0],
+            T,
+            true,
+          ),
+        );
+
+        // outer perimeter safety net
+        const bx0 = 10,
+          by0 = 10,
+          bx1 = WW - 10,
+          by1 = WH - 10;
+        structural.push(new Wall(bx0, by0, bx1 - bx0, 12));
+        structural.push(new Wall(bx0, by1 - 12, bx1 - bx0, 12));
+        structural.push(new Wall(bx0, by0, 12, by1 - by0));
+        structural.push(new Wall(bx1 - 12, by0, 12, by1 - by0));
+
+        return { structural, barricades, doors, furniture, rooms };
+      }
+
+      // ═══════════════════════════════════════════════════════════════════════════
+      //  GAME
+      // ═══════════════════════════════════════════════════════════════════════════
+      const CALL_TIME = 180; // 3 minutes
+      const RADIO_LINES = [
+        'YOU: "Command, this is Hunter — I have the vaccine."',
+        'COMMAND: "Copy. We can\'t land inside — get to the exit."',
+        'COMMAND: "Three minutes. Move, Hunter."',
+      ];
+      const KATANA_RADIUS = 250;
+      class Game {
+        constructor() {
+          const map = buildHospital();
+          this.structural = map.structural;
+          this.barricades = map.barricades;
+          this.doors = map.doors;
+          this.furniture = map.furniture;
+          this.rooms = map.rooms;
+          this.walls = [...this.structural, ...this.barricades];
+
+          const reception = this.rooms.find((r) => r.id === "reception");
+          this.player = new Player(
+            reception.x + reception.w / 2,
+            reception.y + reception.h / 2,
+          );
+          this.cam = { x: this.player.x - W / 2, y: this.player.y - H / 2 };
+
+          this.bullets = [];
+          this.aliens = [];
+          this.effects = [];
+          this.powerups = [];
+
+          const pool = this.rooms.filter((r) => !r.isRadio && !r.isExit);
+          const vr = pool[ri(0, pool.length - 1)];
+          this.vaccine = new Vaccine(
+            vr.x + rr(50, vr.w - 50),
+            vr.y + rr(50, vr.h - 50),
+          );
+          this.vaccineCollected = false;
+
+          this.radioRoom = this.rooms.find((r) => r.isRadio);
+          this.radioPos = {
+            x: this.radioRoom.x + this.radioRoom.w / 2,
+            y: this.radioRoom.y + this.radioRoom.h / 2,
+          };
+          this.exitRoom = this.rooms.find((r) => r.isExit);
+          this.exitPos = {
+            x: this.exitRoom.x + this.exitRoom.w / 2,
+            y: this.exitRoom.y + this.exitRoom.h / 2,
+          };
+
+          this.radioCalled = false;
+          this.dialogueQueue = [];
+          this.finalTimer = CALL_TIME;
+          this.finalSpawnT = 0;
+          this.finalSpawnIvl = 1.8;
+
+          // corridor rects used to place final-phase spawns on valid open ground
+          this.corridorRects = [
+            { x: LOOP.x, y: LOOP.y, w: LOOP.w, h: 140 },
+            { x: LOOP.x, y: LOOP.y + LOOP.h - 140, w: LOOP.w, h: 140 },
+            { x: LOOP.x, y: LOOP.y, w: 140, h: LOOP.h },
+            { x: LOOP.x + LOOP.w - 140, y: LOOP.y, w: 140, h: LOOP.h },
+          ];
+
+          this.puT = 0;
+          this.puIvl = 20;
+          this.footstepT = 0;
+          this.ambientT = rr(3, 6);
+
+          this.kills = 0;
+          this.score = 0;
+          this.fireT = 0;
+          this.shake = 0;
+          this.shX = 0;
+          this.shY = 0;
+          this.over = false;
+          this.won = false;
+          this.missed = false;
+          this.paused = false;
+          this.banner = { txt: "FIND THE VACCINE", t: 3 };
+          this.prompt = "";
+        }
+        resolved() {
+          return this.over || this.won || this.missed;
+        }
+        togglePause() {
+          this.paused = !this.paused;
+          playBuf(sfx.pause, 0.5);
+          if (bgmAudio)
+            bgmAudio.volume = (this.paused ? 0.12 : 0.4) * masterVol;
+        }
+        switchWeapon(digitKey) {
+          const map = { 1: "pistol", 2: "ar", 3: "shotgun" };
+          const name = map[digitKey];
+          if (name) this.player.switchWeapon(name);
+        }
+        useMedkit() {
+          const p = this.player;
+          if (p.medkits > 0 && p.hp < p.maxHp) {
+            p.medkits--;
+            p.hp = Math.min(p.maxHp, p.hp + 70);
+            playBuf(sfx.pickup, 0.6);
+          }
+        }
+        useKatana() {
+          const p = this.player;
+          if (p.katanaCharges <= 0) return;
+          p.katanaCharges--;
+          playBuf(sfx.katana, 0.8);
+          this.effects.push(new KatanaSlash(p.x, p.y, KATANA_RADIUS));
+          this.shake = Math.max(this.shake, 0.6);
+          for (const a of this.aliens) {
+            if (!a.alive) continue;
+            if (dist(a, p) <= KATANA_RADIUS + a.radius) {
+              a.alive = false;
+              playBuf(sfx.death, 0.5, ri(-200, 200));
+              for (let i = 0; i < 18; i++)
+                this.effects.push(new BloodParticle(a.x, a.y, true, a.bl));
+              this.score += a.sv;
+              this.kills++;
+            }
+          }
+          this.aliens = this.aliens.filter((a) => a.alive);
+        }
+        tryInteract() {
+          if (!this.vaccineCollected && dist(this.player, this.vaccine) < 55) {
+            this.vaccineCollected = true;
+            this.vaccine.collected = true;
+            playBuf(sfx.vaccine, 0.8);
+            this.banner = {
+              txt: "VACCINE SECURED — FIND THE RADIO ROOM",
+              t: 3.5,
+            };
+            return;
+          }
+          if (
+            this.vaccineCollected &&
+            !this.radioCalled &&
+            dist(this.player, this.radioPos) < 80
+          ) {
+            this.radioCalled = true;
+            this.finalTimer = CALL_TIME;
+            playBuf(sfx.radio, 0.8);
+            this.dialogueQueue = RADIO_LINES.map((t) => ({ txt: t, t: 3 }));
+            this.banner = this.dialogueQueue.shift();
+            return;
+          }
+          if (
+            this.radioCalled &&
+            this.player.x > this.exitRoom.x &&
+            this.player.x < this.exitRoom.x + this.exitRoom.w &&
+            this.player.y > this.exitRoom.y &&
+            this.player.y < this.exitRoom.y + this.exitRoom.h
+          ) {
+            this.won = true;
+            playBuf(sfx.heli, 0.7);
+          }
+        }
+        _openDoor(door) {
+          door.open = true;
+          playBuf(sfx.door, 0.5);
+          const room = door.room;
+          if (!room.spawned) {
+            room.spawned = true;
+            if (room.aliens && room.aliens.length) playBuf(sfx.alienGrowl, 0.5);
+            for (const [type, count] of room.aliens || []) {
+              for (let i = 0; i < count; i++) {
+                const ax = room.x + rr(40, room.w - 40),
+                  ay = room.y + rr(40, room.h - 40);
+                this.aliens.push(new Alien(ax, ay, type, 1));
+              }
+            }
+          }
+        }
+        _w2s(wx, wy) {
+          return {
+            x: wx - this.cam.x + this.shX,
+            y: wy - this.cam.y + this.shY,
+          };
+        }
+        _s2w(sx, sy) {
+          return { x: sx + this.cam.x, y: sy + this.cam.y };
+        }
+
+        update(dt) {
+          if (this.resolved()) {
+            if (keys.has("r")) game = new Game();
+            return;
+          }
+          if (this.paused) return;
+          if (this.shake > 0) {
+            this.shake = Math.max(0, this.shake - dt * 12);
+            this.shX = (Math.random() * 2 - 1) * this.shake * 9;
+            this.shY = (Math.random() * 2 - 1) * this.shake * 9;
+          } else {
+            this.shX = this.shY = 0;
+          }
+
+          const wm = this._s2w(mouse.x, mouse.y);
+          this.player.update(dt, wm, this.walls);
+          if (this.player.hp <= 0) {
+            this.over = true;
+            return;
+          }
+
+          // footsteps
+          if (this.player.moving) {
+            this.footstepT += dt;
+            if (this.footstepT > 0.32) {
+              this.footstepT = 0;
+              playFile("assets/foot.mp3", 0.32);
+            }
+          } else this.footstepT = 0.32;
+
+          this.cam.x = lerp(this.cam.x, this.player.x - W / 2, 0.09);
+          this.cam.y = lerp(this.cam.y, this.player.y - H / 2, 0.09);
+          this.cam.x = clamp(this.cam.x, 0, WW - W);
+          this.cam.y = clamp(this.cam.y, 0, WH - H);
+
+          for (const d of this.doors) {
+            if (d.open) continue;
+            if (dist(this.player, { x: d.x + d.w / 2, y: d.y + d.h / 2 }) < 100)
+              this._openDoor(d);
+          }
+
+          this.prompt = "";
+          if (!this.vaccineCollected && dist(this.player, this.vaccine) < 70)
+            this.prompt = "[E] Collect Vaccine";
+          else if (
+            this.vaccineCollected &&
+            !this.radioCalled &&
+            dist(this.player, this.radioPos) < 95
+          )
+            this.prompt = "[E] Call Helicopter";
+          else if (
+            this.radioCalled &&
+            this.player.x > this.exitRoom.x &&
+            this.player.x < this.exitRoom.x + this.exitRoom.w &&
+            this.player.y > this.exitRoom.y &&
+            this.player.y < this.exitRoom.y + this.exitRoom.h
+          )
+            this.prompt = "[E] Escape the Hospital";
+          else if (
+            this.player.ammo[this.player.weapon].mag === 0 &&
+            !this.player.reloading
+          )
+            this.prompt = "[R] Reload";
+          if (this.player.katanaCharges > 0)
+            this.prompt =
+              (this.prompt ? this.prompt + "   " : "") +
+              `[Q] Katana x${this.player.katanaCharges}`;
+
+          if (this.radioCalled && !this.won) {
+            this.finalTimer = Math.max(0, this.finalTimer - dt);
+            this.finalSpawnT += dt;
+            const elapsed = CALL_TIME - this.finalTimer;
+            this.finalSpawnIvl = Math.max(1.1, 1.8 - elapsed * 0.004);
+            if (this.finalSpawnT >= this.finalSpawnIvl && this.finalTimer > 0) {
+              this.finalSpawnT = 0;
+              const boost = 1 + elapsed * 0.006;
+              const n = elapsed > 90 ? 2 : 1;
+              for (let i = 0; i < n; i++) {
+                const cr =
+                  this.corridorRects[ri(0, this.corridorRects.length - 1)];
+                const sx = rr(cr.x + 40, cr.x + cr.w - 40),
+                  sy = rr(cr.y + 40, cr.y + cr.h - 40);
+                const r = Math.random();
+                const type = r < 0.6 ? "runner" : r < 0.88 ? "crawler" : "tank";
+                this.aliens.push(new Alien(sx, sy, type, boost));
+              }
+            }
+            // timer reaching zero no longer fails the mission — the helicopter
+            // will still take the player, it's just no longer a race
+          }
+
+          this.fireT = Math.max(0, this.fireT - dt);
+          const wantFire = this.player.cfg.auto
+            ? mouse.held
+            : mouse.pressedEdge;
+          if (wantFire && this.fireT === 0 && !this.player.reloading)
+            this._fire();
+          mouse.pressedEdge = false;
+
+          for (const b of this.bullets) b.update(dt);
+          for (const b of this.bullets) {
+            if (!b.alive) continue;
+            for (const w of this.walls) {
+              if (!w.alive) continue;
+              if (circleRect(b.x, b.y, 4, w.x, w.y, w.w, w.h).hit) {
+                b.alive = false;
+                this.effects.push(new Spark(b.x, b.y));
+                playBuf(sfx.wallhit, 0.25);
+                if (w.breakable) {
+                  w.hp -= b.damage * 0.5;
+                  if (w.hp <= 0) {
+                    w.alive = false;
+                    playBuf(sfx.wallbreak, 0.5);
+                  }
+                }
+                break;
+              }
+            }
+          }
+          this.bullets = this.bullets.filter((b) => b.alive);
+
+          for (const a of this.aliens) {
+            if (dist(a, this.player) < 1500)
+              a.update(dt, this.player.x, this.player.y, this.walls);
+          }
+
+          outer: for (const b of this.bullets) {
+            if (!b.alive) continue;
+            for (const a of this.aliens) {
+              if (!a.alive) continue;
+              if (dist(b, a) < a.radius + 5) {
+                b.alive = false;
+                a.hp -= b.damage;
+                a.hitFlash = 1.0;
+                for (let i = 0; i < 9; i++)
+                  this.effects.push(new BloodParticle(a.x, a.y, false, a.bl));
+                if (a.hp <= 0) {
+                  a.alive = false;
+                  playBuf(sfx.death, 0.55, ri(-200, 200));
+                  for (let i = 0; i < 28; i++)
+                    this.effects.push(new BloodParticle(a.x, a.y, true, a.bl));
+                  this.score += a.sv;
+                  this.kills++;
+                } else {
+                  playBuf(sfx.hit, 0.35);
+                }
+                continue outer;
+              }
+            }
+          }
+          this.aliens = this.aliens.filter((a) => a.alive);
+
+          if (this.player.invTimer <= 0) {
+            for (const a of this.aliens) {
+              if (dist(a, this.player) < a.radius + this.player.radius) {
+                this.player.takeDamage(a.dmg);
+                this.player.invTimer = 1.1;
+                this.shake = Math.max(this.shake, 0.9);
+                playBuf(sfx.hurt, 0.7);
+                for (let i = 0; i < 14; i++)
+                  this.effects.push(
+                    new BloodParticle(
+                      this.player.x,
+                      this.player.y,
+                      true,
+                      [200, 20, 20],
+                    ),
+                  );
+                if (this.player.hp <= 0) this.over = true;
+                break;
+              }
+            }
+          }
+
+          // ambient alien growls when they're nearby
+          this.ambientT -= dt;
+          if (this.ambientT <= 0) {
+            this.ambientT = rr(4, 9);
+            if (this.aliens.some((a) => dist(a, this.player) < 650))
+              playBuf(sfx.alienGrowl, 0.35, ri(-150, 150));
+          }
+
+          this.puT += dt;
+          if (this.puT >= this.puIvl) {
+            this.puT = 0;
+            const room = this.rooms[ri(0, this.rooms.length - 1)];
+            const type = Math.random() < 0.5 ? "health" : "armor";
+            this.powerups.push(
+              new PowerUp(
+                room.x + rr(40, room.w - 40),
+                room.y + rr(40, room.h - 40),
+                type,
+              ),
+            );
+          }
+          for (const pu of this.powerups) pu.update(dt);
+          for (const pu of this.powerups) {
+            if (!pu.alive) continue;
+            if (dist(pu, this.player) < this.player.radius + 20) {
+              pu.alive = false;
+              playBuf(sfx.pickup, 0.6);
+              if (pu.type === "health")
+                this.player.medkits = Math.min(5, this.player.medkits + 1);
+              else
+                this.player.armor = Math.min(
+                  this.player.maxArmor,
+                  this.player.armor + 50,
+                );
+            }
+          }
+          this.powerups = this.powerups.filter((p) => p.alive);
+          this.vaccine.update(dt);
+          for (const f of this.furniture) f.update(dt);
+
+          for (const e of this.effects) e.update(dt);
+          this.effects = this.effects.filter((e) => e.alive);
+          if (this.banner) {
+            this.banner.t -= dt;
+            if (this.banner.t <= 0 && this.dialogueQueue.length)
+              this.banner = this.dialogueQueue.shift();
+          }
+        }
+
+        _fire() {
+          const cfg = this.player.cfg,
+            a = this.player.ammo[this.player.weapon];
+          if (a.mag <= 0) {
+            if (a.reserve > 0 && !this.player.reloading) this.player.reload();
+            else playBuf(sfx.empty, 0.4);
+            return;
+          }
+          a.mag--;
+          this.fireT = cfg.fireRate;
+          this.player.recoilOffset = cfg.recoil;
+          for (let i = 0; i < cfg.pellets; i++) {
+            const sp = (Math.random() - 0.5) * cfg.spread;
+            const ang = this.player.angle + sp;
+            const bx = this.player.x + Math.cos(this.player.angle) * 30,
+              by = this.player.y + Math.sin(this.player.angle) * 30;
+            this.bullets.push(
+              new Bullet(
+                bx,
+                by,
+                Math.cos(ang) * 950,
+                Math.sin(ang) * 950,
+                cfg.dmg,
+              ),
+            );
+          }
+          const mx = this.player.x + Math.cos(this.player.angle) * 30,
+            my = this.player.y + Math.sin(this.player.angle) * 30;
+          this.effects.push(new MuzzleFlash(mx, my, this.player.angle));
+          this.effects.push(
+            new ShellCasing(this.player.x, this.player.y, this.player.angle),
+          );
+          playFile(cfg.sndFile, 0.7);
+          this.shake = Math.max(this.shake, cfg.pellets > 1 ? 0.25 : 0.13);
+        }
+
+        draw() {
+          ctx.clearRect(0, 0, W, H);
+          const cx = Math.round(this.cam.x + this.shX),
+            cy = Math.round(this.cam.y + this.shY);
+          ctx.drawImage(floorCanvas, cx, cy, W, H, 0, 0, W, H);
+
+          for (const room of this.rooms) {
+            if (!room.light || room.light === "normal") continue;
+            const sx = room.x - cx,
+              sy = room.y - cy;
+            if (sx + room.w < 0 || sx > W || sy + room.h < 0 || sy > H)
+              continue;
+            ctx.fillStyle =
+              room.light === "red" ? "rgba(120,0,0,0.16)" : "rgba(0,0,0,0.22)";
+            ctx.fillRect(sx, sy, room.w, room.h);
+          }
+
+          for (const f of this.furniture) f.draw(ctx, { x: cx, y: cy });
+          for (const w of this.walls) w.draw(ctx, { x: cx, y: cy });
+          for (const d of this.doors) d.draw(ctx, { x: cx, y: cy });
+
+          if (!this.vaccineCollected) {
+            const s = this._w2s(this.vaccine.x, this.vaccine.y);
+            this.vaccine.draw(ctx, s.x, s.y);
+          }
+          for (const pu of this.powerups) {
+            const s = this._w2s(pu.x, pu.y);
+            pu.draw(ctx, s.x, s.y);
+          }
+
+          if (this.vaccineCollected && !this.radioCalled) {
+            const s = this._w2s(this.radioPos.x, this.radioPos.y);
+            const pulse = 6 * Math.sin(performance.now() / 200);
+            ctx.save();
+            ctx.globalAlpha = 0.85;
+            ctx.strokeStyle = "#33ddff";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, 34 + pulse, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = "#33ddff";
+            ctx.font = "bold 16px Poppins";
+            ctx.textAlign = "center";
+            ctx.fillText("R", s.x, s.y + 6);
+            ctx.textAlign = "left";
+            ctx.restore();
+          }
+          if (this.radioCalled) {
+            const s = this._w2s(this.exitPos.x, this.exitPos.y);
+            const pulse = 6 * Math.sin(performance.now() / 200);
+            ctx.save();
+            ctx.globalAlpha = 0.85;
+            ctx.strokeStyle = "#ff5533";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, 34 + pulse, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = "#ff5533";
+            ctx.font = "bold 16px Poppins";
+            ctx.textAlign = "center";
+            ctx.fillText("E", s.x, s.y + 6);
+            ctx.textAlign = "left";
+            ctx.restore();
+          }
+
+          for (const e of this.effects) {
+            if (e instanceof BloodParticle) {
+              const s = this._w2s(e.x, e.y);
+              e.draw(ctx, s.x, s.y);
+            }
+          }
+          for (const b of this.bullets) {
+            for (let i = 0; i < b.trail.length; i++) {
+              const t = (i + 1) / b.trail.length;
+              const ts = {
+                x: b.trail[i].x - this.cam.x + this.shX,
+                y: b.trail[i].y - this.cam.y + this.shY,
+              };
+              ctx.globalAlpha = t * 0.38;
+              ctx.fillStyle = "#ffee44";
+              ctx.beginPath();
+              ctx.arc(ts.x, ts.y, 1.5 * t, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            ctx.globalAlpha = 1;
+            const s = this._w2s(b.x, b.y);
+            b.draw(ctx, s.x, s.y, {
+              x: this.cam.x - this.shX,
+              y: this.cam.y - this.shY,
+            });
+          }
+          for (const a of this.aliens) {
+            const s = this._w2s(a.x, a.y);
+            a.draw(ctx, s.x, s.y);
+          }
+          {
+            const s = this._w2s(this.player.x, this.player.y);
+            this.player.draw(ctx, s.x, s.y);
+          }
+          for (const e of this.effects) {
+            if (!(e instanceof BloodParticle)) {
+              const s = this._w2s(e.x, e.y);
+              e.draw(ctx, s.x, s.y);
+            }
+          }
+
+          this._drawCrosshair();
+          const vg = ctx.createRadialGradient(
+            W / 2,
+            H / 2,
+            H * 0.2,
+            W / 2,
+            H / 2,
+            H * 0.74,
+          );
+          vg.addColorStop(0, "rgba(0,0,0,0)");
+          vg.addColorStop(1, "rgba(0,0,0,0.78)");
+          ctx.fillStyle = vg;
+          ctx.fillRect(0, 0, W, H);
+
+          this._hud();
+          if (this.banner && this.banner.t > 0) this._drawBanner();
+          if (this.paused) this._drawPause();
+          if (this.over) this._drawOver();
+          if (this.won) this._drawWin();
+          if (this.missed) this._drawMissed();
+        }
+
+        _drawCrosshair() {
+          const x = mouse.x,
+            y = mouse.y,
+            gap = 6,
+            len = 12,
+            t = 1.5;
+          ctx.strokeStyle = "rgba(255,50,50,0.85)";
+          ctx.lineWidth = t;
+          ctx.lineCap = "square";
+          ctx.beginPath();
+          ctx.moveTo(x - gap - len, y);
+          ctx.lineTo(x - gap, y);
+          ctx.moveTo(x + gap, y);
+          ctx.lineTo(x + gap + len, y);
+          ctx.moveTo(x, y - gap - len);
+          ctx.lineTo(x, y - gap);
+          ctx.moveTo(x, y + gap);
+          ctx.lineTo(x, y + gap + len);
+          ctx.stroke();
+          ctx.strokeStyle = "rgba(255,50,50,0.35)";
+          ctx.beginPath();
+          ctx.arc(x, y, gap + 3, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        _panel(x, y, w, h, r) {
+          ctx.save();
+          ctx.shadowColor = "rgba(0,0,0,0.6)";
+          ctx.shadowBlur = 14;
+          ctx.shadowOffsetY = 3;
+          ctx.fillStyle = "rgba(12,12,14,0.72)";
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          ctx.strokeStyle = "rgba(255,255,255,0.08)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+          ctx.stroke();
+        }
+        _roundRect(x, y, w, h, r) {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+        }
+
+        _hud() {
+          const p = this.player;
+
+          this._panel(14, 14, 190, 54, 10);
+          ctx.fillStyle = "#888";
+          ctx.font = "600 10px Poppins";
+          ctx.fillText("HP", 24, 30);
+          ctx.fillStyle = "#2a0000";
+          this._roundRect(50, 22, 144, 12, 4);
+          ctx.fill();
+          const hpr = Math.max(0, p.hp / p.maxHp);
+          ctx.fillStyle =
+            hpr > 0.6 ? "#00cc00" : hpr > 0.3 ? "#ff9900" : "#ff2200";
+          this._roundRect(50, 22, 144 * hpr, 12, 4);
+          ctx.fill();
+          ctx.strokeStyle = "#444";
+          ctx.lineWidth = 1;
+          this._roundRect(50, 22, 144, 12, 4);
+          ctx.stroke();
+          ctx.fillStyle = "#888";
+          ctx.font = "600 10px Poppins";
+          ctx.fillText("AR", 24, 50);
+          ctx.fillStyle = "#001a2a";
+          this._roundRect(50, 42, 144, 12, 4);
+          ctx.fill();
+          const ar = p.armor / p.maxArmor;
+          ctx.fillStyle = "#3a9fdc";
+          this._roundRect(50, 42, 144 * ar, 12, 4);
+          ctx.fill();
+          ctx.strokeStyle = "#335";
+          this._roundRect(50, 42, 144, 12, 4);
+          ctx.stroke();
+
+          let obj = "FIND THE VACCINE";
+          if (this.radioCalled) {
+            if (this.finalTimer > 0) {
+              const mm = Math.floor(this.finalTimer / 60),
+                ss = Math.floor(this.finalTimer % 60);
+              obj = `REACH EXIT — ${mm}:${ss.toString().padStart(2, "0")}`;
+            } else obj = "REACH THE EXIT";
+          } else if (this.vaccineCollected) obj = "FIND THE RADIO ROOM";
+          this._panel(W / 2 - 170, 14, 340, 36, 10);
+          ctx.fillStyle = this.radioCalled ? "#ff3322" : "#ffdd33";
+          ctx.font = "700 14px Poppins";
+          ctx.textAlign = "center";
+          ctx.fillText(obj, W / 2, 37);
+          ctx.textAlign = "left";
+
+          this._panel(W - 224, 14, 210, 74, 10);
+          drawWeaponIcon(ctx, p.weapon, W - 210, 26, 1.15);
+          const cfg = p.cfg,
+            am = p.ammo[p.weapon];
+          ctx.fillStyle = "#ffaa33";
+          ctx.font = "700 12px Poppins";
+          ctx.fillText(cfg.name, W - 210, 58);
+          if (p.reloading) {
+            const rp = 1 - p.reloadTimer / cfg.reloadTime;
+            ctx.fillStyle = "#332200";
+            this._roundRect(W - 210, 64, 180, 12, 4);
+            ctx.fill();
+            ctx.fillStyle = "#ff9900";
+            this._roundRect(W - 210, 64, 180 * rp, 12, 4);
+            ctx.fill();
+            ctx.strokeStyle = "#444";
+            this._roundRect(W - 210, 64, 180, 12, 4);
+            ctx.stroke();
+          } else {
+            ctx.fillStyle = "#1a1a00";
+            this._roundRect(W - 210, 64, 180, 12, 4);
+            ctx.fill();
+            ctx.fillStyle = am.mag > cfg.mag * 0.3 ? "#ddcc00" : "#ff5522";
+            this._roundRect(W - 210, 64, 180 * (am.mag / cfg.mag), 12, 4);
+            ctx.fill();
+            ctx.strokeStyle = "#444";
+            this._roundRect(W - 210, 64, 180, 12, 4);
+            ctx.stroke();
+            ctx.fillStyle = "#fff";
+            ctx.font = "600 9px Poppins";
+            ctx.textAlign = "center";
+            ctx.fillText(`${am.mag} / ${am.reserve}`, W - 120, 73);
+            ctx.textAlign = "left";
+          }
+
+          this._panel(W - 224, 92, 210, 30, 8);
+          ctx.fillStyle = "#1fdd55";
+          ctx.fillRect(W - 214, 98, 10, 18);
+          ctx.fillRect(W - 219, 103, 20, 8);
+          ctx.fillStyle = "#fff";
+          ctx.font = "700 12px Poppins";
+          ctx.fillText(`x${p.medkits}`, W - 186, 111);
+          ctx.fillStyle = "#bfe8ff";
+          ctx.font = "700 12px Poppins";
+          ctx.fillText(`⚔ x${p.katanaCharges}`, W - 120, 111);
+          ctx.fillStyle = "#555";
+          ctx.font = "600 10px Poppins";
+          ctx.fillText("[H] [Q]", W - 70, 111);
+
+          this._panel(14, H - 104, 120, 90, 10);
+          ctx.fillStyle = "#555";
+          ctx.font = "700 10px Poppins";
+          ctx.textAlign = "center";
+          ctx.fillText("MINIMAP", 74, H - 60);
+          ctx.font = "500 9px Poppins";
+          ctx.fillText("(coming soon)", 74, H - 46);
+          ctx.textAlign = "left";
+
+          if (this.prompt) {
+            this._panel(W - 220, H - 56, 206, 34, 10);
+            ctx.fillStyle = "#ffdd33";
+            ctx.font = "700 12px Poppins";
+            ctx.textAlign = "center";
+            ctx.fillText(this.prompt, W - 117, H - 35);
+            ctx.textAlign = "left";
+          }
+
+          ctx.fillStyle = "#888";
+          ctx.font = "500 11px Poppins";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            `SCORE ${this.score}   KILLS ${this.kills}`,
+            W / 2,
+            H - 16,
+          );
+          ctx.textAlign = "left";
+        }
+
+        _drawBanner() {
+          const b = this.banner;
+          const alpha = Math.min(1, b.t / 0.5);
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = "rgba(0,0,0,0.6)";
+          ctx.fillRect(0, H / 2 - 42, W, 76);
+          ctx.font = "700 22px Poppins";
+          ctx.textAlign = "center";
+          ctx.shadowColor = "rgba(0,0,0,0.85)";
+          ctx.shadowBlur = 6;
+          ctx.shadowOffsetY = 2;
+          ctx.fillStyle = "#ffee44";
+          ctx.fillText(b.txt, W / 2, H / 2);
+          ctx.shadowBlur = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.globalAlpha = 1;
+          ctx.restore();
+          ctx.textAlign = "left";
+        }
+        _drawPause() {
+          ctx.fillStyle = "rgba(0,0,0,0.72)";
+          ctx.fillRect(0, 0, W, H);
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#fff";
+          ctx.font = "800 44px Poppins";
+          ctx.fillText("PAUSED", W / 2, H / 2 - 20);
+          ctx.fillStyle = "#999";
+          ctx.font = "500 15px Poppins";
+          ctx.fillText("[ ESC ]  to resume", W / 2, H / 2 + 24);
+          ctx.textAlign = "left";
+        }
+        _drawOver() {
+          ctx.fillStyle = "rgba(0,0,0,0.82)";
+          ctx.fillRect(0, 0, W, H);
+          ctx.textAlign = "center";
+          ctx.shadowColor = "#f00";
+          ctx.shadowBlur = 40;
+          ctx.fillStyle = "#ff2222";
+          ctx.font = "800 74px Poppins";
+          ctx.fillText("YOU DIED", W / 2, H / 2 - 65);
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "700 28px Poppins";
+          ctx.fillText(`SCORE: ${this.score}`, W / 2, H / 2 - 5);
+          ctx.fillStyle = "#aaaaaa";
+          ctx.font = "500 20px Poppins";
+          ctx.fillText(`KILLS: ${this.kills}`, W / 2, H / 2 + 38);
+          ctx.fillStyle = "#666";
+          ctx.font = "500 14px Poppins";
+          ctx.fillText("[ PRESS  R  TO  RESTART ]", W / 2, H / 2 + 88);
+          ctx.textAlign = "left";
+        }
+        _drawWin() {
+          ctx.fillStyle = "rgba(0,10,20,0.85)";
+          ctx.fillRect(0, 0, W, H);
+          ctx.textAlign = "center";
+          ctx.shadowColor = "#0af";
+          ctx.shadowBlur = 35;
+          ctx.fillStyle = "#33ddff";
+          ctx.font = "800 40px Poppins";
+          ctx.fillText("LEVEL COMPLETE", W / 2, H / 2 - 58);
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#fff";
+          ctx.font = "600 16px Poppins";
+          ctx.fillText(
+            "You made it out. The Courtyard awaits — Level 2.",
+            W / 2,
+            H / 2 - 20,
+          );
+          ctx.fillStyle = "#fff";
+          ctx.font = "700 24px Poppins";
+          ctx.fillText(`SCORE: ${this.score}`, W / 2, H / 2 + 18);
+          ctx.fillStyle = "#aaa";
+          ctx.font = "500 18px Poppins";
+          ctx.fillText(`KILLS: ${this.kills}`, W / 2, H / 2 + 48);
+          ctx.fillStyle = "#666";
+          ctx.font = "500 14px Poppins";
+          ctx.fillText("[ PRESS  R  TO  PLAY  AGAIN ]", W / 2, H / 2 + 90);
+          ctx.textAlign = "left";
+        }
+        _drawMissed() {
+          ctx.fillStyle = "rgba(20,10,0,0.85)";
+          ctx.fillRect(0, 0, W, H);
+          ctx.textAlign = "center";
+          ctx.shadowColor = "#f80";
+          ctx.shadowBlur = 35;
+          ctx.fillStyle = "#ff8833";
+          ctx.font = "800 34px Poppins";
+          ctx.fillText("THE HOSPITAL WAS OVERRUN", W / 2, H / 2 - 55);
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = "#fff";
+          ctx.font = "700 24px Poppins";
+          ctx.fillText(`SCORE: ${this.score}`, W / 2, H / 2 - 5);
+          ctx.fillStyle = "#aaa";
+          ctx.font = "500 18px Poppins";
+          ctx.fillText(`KILLS: ${this.kills}`, W / 2, H / 2 + 30);
+          ctx.fillStyle = "#666";
+          ctx.font = "500 14px Poppins";
+          ctx.fillText("[ PRESS  R  TO  TRY  AGAIN ]", W / 2, H / 2 + 76);
+          ctx.textAlign = "left";
+        }
+      }
+      startMenuBgm();
+    </script>
+  </body>
+</html>
